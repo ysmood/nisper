@@ -33,6 +33,11 @@ module.exports = ({
     }
 
     function send (ws, msg) {
+        // connecting
+        if (ws.readState === 0) {
+            return setTimeout(send, 100, ws, msg);
+        }
+
         ws.send(encode(msg));
     }
 
@@ -47,7 +52,7 @@ module.exports = ({
         }
 
         Nisp(nisp, sandbox).then(function (result) {
-            return send(ws, {
+            send(ws, {
                 type: 'response',
                 id,
                 result
@@ -119,16 +124,14 @@ module.exports = ({
     } else {
         var ws;
 
-        var reconnect = () => {
-            if (reconnectSpan !== 0) {
-                setTimeout(connect, reconnectSpan);
-            }
-        };
-
         var connect = () => {
             ws = new WebSocket(url);
             ws.onmessage = ({ data }) => genOnMessage(ws)(data);
-            ws.onclose = reconnect;
+            ws.onclose = () => {
+                if (reconnectSpan !== 0) {
+                    setTimeout(connect, reconnectSpan);
+                }
+            };
         };
 
         connect();
