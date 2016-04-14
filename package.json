@@ -1,15 +1,51 @@
 {
   "name": "nisper",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "",
   "main": "index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "author": "",
   "license": "ISC",
   "dependencies": {
     "nisp": "^0.5.3",
     "ws": "^1.1.0",
     "yaku": "^0.15.1"
+  },
+  "eslintConfig": {
+    "parserOptions": {
+      "ecmaVersion": 6
+    },
+    "rules": {
+      "indent": [
+        2,
+        4
+      ],
+      "linebreak-style": [
+        2,
+        "unix"
+      ],
+      "semi": [
+        2,
+        "always"
+      ],
+      "no-trailing-spaces": 2,
+      "space-before-function-paren": [
+        2,
+        "always"
+      ],
+      "no-unused-vars": 0,
+      "eqeqeq": [
+        2,
+        "allow-null"
+      ]
+    },
+    "env": {
+      "browser": true,
+      "node": true
+    },
+    "extends": "eslint:recommended"
+  },
+  "devDependencies": {
+    "eslint": "^2.7.0"
   }
 }

@@ -5,10 +5,13 @@
 
 var Nisp = require('nisp');
 var Promise = require('yaku');
+var retry = require('yaku/lib/retry');
 
 class NisperError extends Error {
     constructor (msg, details) {
         super(msg);
+
+        this.message = msg + '\n' + JSON.stringify(details);
 
         this.details = details;
     }
@@ -21,10 +24,11 @@ module.exports = ({
     onConnection = (ws) => {
         return true;
     },
-    reconnectSpan = 1000,
-    timeout = 5000,
+    retrySpan = 1000,
+    timeout = 30 * 1000,
+    retryCount = 10,
     onError = (err, nisp) => {
-        console.error(err.stack, encode(nisp)); // eslint-disable-line
+        console.error(err.stack, JSON.stringify(err.details, 0, 4)); // eslint-disable-line
     },
     encode = (data) => {
         return JSON.stringify(data, 0, 4);
@@ -34,19 +38,33 @@ module.exports = ({
     }
 }) => {
 
-    var rpcPool = {};
+    var rpcSessions = {};
 
     function genId () {
-        return Math.random().toString().slice(2);
+        return Math.random().toString(32).slice(2);
+    }
+
+    function resend (ws, data, countDown) {
+        if (countDown-- < 0) {
+            onError(new NisperError('send failed', decode(data)));
+            return;
+        }
+
+        try {
+            ws.send(data);
+        } catch (err) {
+            setTimeout(resend, retrySpan, ws, data, countDown);
+        }
     }
 
     function send (ws, msg) {
-        // connecting
-        if (ws.readState === 0) {
-            return setTimeout(send, 100, ws, msg);
-        }
+        var data = encode(msg);
 
-        ws.send(encode(msg));
+        try {
+            ws.send(data);
+        } catch (err) {
+            resend(ws, data, retryCount);
+        }
     }
 
     var genOnMessage = (ws) => (msg) => {
@@ -54,8 +72,8 @@ module.exports = ({
         var { type, id, nisp } = data;
 
         if (type === 'response') {
-            if (rpcPool[id])
-                rpcPool[id](data);
+            if (rpcSessions[id])
+                rpcSessions[id](data);
             return;
         }
 
@@ -81,7 +99,7 @@ module.exports = ({
         });
     };
 
-    var call = (ws, nisp) => {
+    var call = (ws, nisp, opts = {}) => {
         var id = genId();
 
         var callData = {
@@ -94,13 +112,12 @@ module.exports = ({
 
         return new Promise((resolve, reject) => {
             var tmr = setTimeout(() => {
-                delete rpcPool[id];
-                reject(new NisperError('rpc timeout', callData));
-            }, timeout);
+                delete rpcSessions[id];
+            }, opts.timeout || timeout);
 
-            rpcPool[id] = (data) => {
+            rpcSessions[id] = (data) => {
                 clearTimeout(tmr);
-                delete rpcPool[id];
+                delete rpcSessions[id];
 
                 if (data.error)
                     reject(new NisperError(
@@ -136,18 +153,24 @@ module.exports = ({
         var ws;
 
         var connect = () => {
-            ws = new WebSocket(url);
+            try {
+                ws = new WebSocket(url);
+            } catch (err) {
+                setTimeout(connect, retrySpan);
+                return;
+            }
+
             ws.onmessage = ({ data }) => genOnMessage(ws)(data);
             ws.onclose = () => {
-                if (reconnectSpan !== 0) {
-                    setTimeout(connect, reconnectSpan);
+                if (retrySpan !== 0) {
+                    setTimeout(connect, retrySpan);
                 }
             };
         };
 
         connect();
 
-        return (nisp) => call(ws, nisp);
+        return (nisp, opts) => call(ws, nisp, opts);
     }
 };
 
