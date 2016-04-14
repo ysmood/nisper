@@ -97,7 +97,9 @@ module.exports = ({
         });
     };
 
-    var WebSocket = typeof WebSocket === 'function' ? WebSocket : require('ws');
+    if (typeof WebSocket !== 'function') {
+        WebSocket = require('ws');
+    }
 
     if (server) {
         var wsServer = new WebSocket.Server({ server });
