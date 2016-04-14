@@ -5,12 +5,11 @@
 
 var Nisp = require('nisp');
 var Promise = require('yaku');
-var WebSocket = require('ws');
 
 module.exports = ({
     sandbox,
     server,
-    url = `ws://${location.host}`,
+    url,
     onConnection = (ws) => {
         return true;
     },
@@ -97,6 +96,8 @@ module.exports = ({
             };
         });
     };
+
+    var WebSocket = typeof WebSocket === 'function' ? WebSocket : require('ws');
 
     if (server) {
         var wsServer = new WebSocket.Server({ server });
