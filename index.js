@@ -6,6 +6,14 @@
 var Nisp = require('nisp');
 var Promise = require('yaku');
 
+class NisperError extends Error {
+    constructor (msg, details) {
+        super(msg);
+
+        this.details = details;
+    }
+}
+
 module.exports = ({
     sandbox,
     server,
@@ -64,6 +72,7 @@ module.exports = ({
                 type: 'response',
                 id,
                 error: {
+                    id,
                     code: err.code,
                     message: err.message,
                     nisp: nisp
@@ -75,16 +84,18 @@ module.exports = ({
     var call = (ws, nisp) => {
         var id = genId();
 
-        send(ws, {
+        var callData = {
             type: 'request',
             id,
             nisp
-        });
+        };
+
+        send(ws, callData);
 
         return new Promise((resolve, reject) => {
             var tmr = setTimeout(() => {
                 delete rpcPool[id];
-                reject(new Error(`rpc timeout:\n${encode(nisp)}`));
+                reject(new NisperError('rpc timeout', callData));
             }, timeout);
 
             rpcPool[id] = (data) => {
@@ -92,9 +103,9 @@ module.exports = ({
                 delete rpcPool[id];
 
                 if (data.error)
-                    reject(new Error(
-                        `${data.error.code}: ${data.error.message}:\n` +
-                        encode(data.error.nisp)
+                    reject(new NisperError(
+                        data.error.message,
+                        data.error
                     ));
                 else
                     resolve(data.result);
@@ -139,3 +150,5 @@ module.exports = ({
         return (nisp) => call(ws, nisp);
     }
 };
+
+module.exports.NisperError = NisperError;
