@@ -128,7 +128,6 @@ module.exports = ({
         var connect = () => {
             ws = new WebSocket(url);
             ws.onmessage = ({ data }) => genOnMessage(ws)(data);
-            ws.onerror = reconnect;
             ws.onclose = reconnect;
         };
 
