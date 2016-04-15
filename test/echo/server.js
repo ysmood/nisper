@@ -10,18 +10,16 @@ var server = require('http').createServer((req, res) => {
     `);
 });
 
-var call = nisper({
+var client = nisper({
     server,
+    sandbox: {
+        echo: plain(([msg]) => msg)
+    },
     onOpen: () => {
-        // boardcast to client
-        call(['echo', 'hi']).then(res => {
+        // when a client connected, boardcast to all clients.
+        client.call(['echo', 'hi']).then(res => {
             console.log('client res:', res);
         });
-
-        return 'server';
-    },
-    sandbox: {
-        echo: plain(([msg], env) => `${env} ${msg}`)
     }
 });
 

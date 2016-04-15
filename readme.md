@@ -6,7 +6,17 @@ To run this file node should enable some harmony flags:
 node --harmony --harmony_destructuring --harmony_default_parameters
 ```
 
+# Features
+
+- Script based call makes the functions composable, you can even write a complex program to remote
+- Safe by design, full control of the user's authority
+- Same api for both node to browser, browser to node and node to node
+- Bidirectional communication
+- Auto reconnect & auto retry
+
 # Example
+
+### Echo Example
 
 Node Server:
 
@@ -15,18 +25,17 @@ var nisper = require('nisper');
 var plain = require('nisp/fn/plain');
 var server = require('http').createServer(() => {});
 
-var call = nisper({
+var client = nisper({
     server,
+    sandbox: {
+        // define a echo function, client can call it remotely.
+        echo: plain(([msg]) => msg)
+    },
     onOpen: () => {
-        // boardcast to client
-        call(['echo', 'hi']).then(res => {
+        // when a client connected, boardcast to all clients.
+        client.call(['echo', 'hi']).then(res => {
             console.log('client res:', res);
         });
-
-        return 'server';
-    },
-    sandbox: {
-        echo: plain(([msg], env) => `${env} ${msg}`)
     }
 });
 
@@ -35,21 +44,21 @@ server.listen(8080);
 ```
 
 
-Browser:
+Browser or node client:
 
 ```js
 var nisper = require('nisper');
 var plain = require('nisp/fn/plain');
 
-var call = nisper({
+var client = nisper({
     url: `ws://${location.host}`,
-    onOpen: () => 'client',
     sandbox: {
-        echo: plain(([msg], env) => `${env} ${msg}`)
+        // define a echo function, server can call it remotely.
+        echo: plain(([msg]) => msg)
     }
 });
 
-call(['echo', 'hey']).then(res => {
+client.call(['echo', 'hey']).then(res => {
     console.log('server res:', res);
 });
 
