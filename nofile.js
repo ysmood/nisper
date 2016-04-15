@@ -2,7 +2,7 @@ var kit = require('nokit');
 
 module.exports = (task) => {
     task('default', () => {
-        kit.spawn('webpack');
+        kit.spawn('webpack', ['--watch']);
 
         kit.spawn('noe', [
             '-b', 'node',
