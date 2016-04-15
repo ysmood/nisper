@@ -1,8 +1,8 @@
 {
   "name": "nisper",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {},
   "author": "",
   "license": "ISC",
@@ -11,6 +11,7 @@
     "ws": "^1.1.0",
     "yaku": "^0.15.1"
   },
+  "files": ["lib"],
   "eslintConfig": {
     "parserOptions": {
       "ecmaVersion": 6
@@ -46,6 +47,8 @@
     "extends": "eslint:recommended"
   },
   "devDependencies": {
-    "eslint": "^2.7.0"
+    "nokit": "^0.20.7",
+    "eslint": "^2.7.0",
+    "webpack": "^1.12.15"
   }
 }
