@@ -1,17 +1,22 @@
 {
   "name": "nisper",
-  "version": "0.2.1",
-  "description": "",
+  "version": "0.2.4",
+  "description": "A RPC lib based on websocket protocol and nisp language",
   "main": "lib/index.js",
-  "scripts": {},
+  "scripts": {
+    "test": "no test",
+    "prepublish": "no lint"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "nisp": "^0.5.3",
-    "ws": "^1.1.0",
-    "yaku": "^0.15.1"
+    "nisp": "0.5.5",
+    "ws": "1.1.0",
+    "yaku": "0.15.1"
   },
-  "files": ["lib"],
+  "files": [
+    "lib"
+  ],
   "eslintConfig": {
     "parserOptions": {
       "ecmaVersion": 6
@@ -47,8 +52,9 @@
     "extends": "eslint:recommended"
   },
   "devDependencies": {
-    "nokit": "^0.20.7",
-    "eslint": "^2.7.0",
-    "webpack": "^1.12.15"
+    "eslint": "2.8.0",
+    "junit": "^1.3.2",
+    "nokit": "0.20.7",
+    "webpack": "1.13.0"
   }
 }

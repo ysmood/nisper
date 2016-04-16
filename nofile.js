@@ -11,13 +11,17 @@ module.exports = (task) => {
 
             '--',
 
-            '--harmony',
-            '--harmony_destructuring',
-            '--harmony_default_parameters',
-
             'test/echo/server.js'
         ]);
 
+    });
+
+    task('lint', () => {
+        kit.spawn('eslint', ['lib', 'test']);
+    });
+
+    task('test', () => {
+        return kit.spawn('junit', ['test/index.js']);
     });
 };
 

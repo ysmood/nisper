@@ -1,7 +1,7 @@
 
 var self = module.exports = {
     entry: {
-        "test.echo.browser": "./test/echo/browser.js"
+        "test.echo.client": "./test/echo/client.js"
     },
 
     output: {
