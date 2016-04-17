@@ -10,6 +10,7 @@ Nisper is a RPC lib based on websocket protocol and nisp language.
 - Script based call makes the functions composable, you can even write a complex program to remote
 - Safe by design, full control of the user's authority
 - Same api for both node to browser, browser to node and node to node
+- Full support for Promise calls
 - Bidirectional communication
 - Auto reconnect
 
@@ -27,13 +28,13 @@ var httpServer = require('http').createServer(() => {});
 var server = nisper({
     httpServer: httpServer,
     sandbox: {
-        // define a echo function, client can call it remotely.
-        echo: fn((msg) => msg)
+        // define a function, client can call it remotely.
+        '+': fn((a, b) => a + b)
     },
     onOpen: () => {
         // when a client connected, boardcast to all clients.
-        server.call(['echo', 'hi']).then(res => {
-            console.log('client res:', res);
+        server.call(['-', 2, 1]).then(res => {
+            console.log('client res:', res); // => [1]
         });
     }
 });
@@ -52,13 +53,14 @@ var fn = require('nisp/fn/plainSpread');
 var client = nisper({
     url: `ws://127.0.0.1:8080`,
     sandbox: {
-        // define a echo function, server can call it remotely.
-        echo: fn((msg) => msg)
+        // define a function, server can call it remotely.
+        '-': fn((a, b) => a - b)
     }
 });
 
-client.call(['echo', 'hey']).then(res => {
-    console.log('server res:', res);
+           // add(1, add(1, 1))
+client.call(['+', 1, ['+', 1, 1]]).then(res => {
+    console.log('server res:', res); // => 3
 });
 
 ```
