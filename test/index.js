@@ -38,17 +38,16 @@ module.exports = (it) => {
     }));
 
     it('client call server', async(function * (after) {
-        var app = flow();
-        yield app.listen(0);
         var defer = kit.Deferred();
+        var client;
 
         after(() => {
             client.close();
-            app.close();
+            server.close();
         });
 
         var server = nisper({
-            httpServer: app.server,
+            wsOptions: { port: 0 },
             sandbox: {
                 echo: fn((msg) => {
                     defer.resolve(it.eq(msg, 'hi'));
@@ -56,11 +55,15 @@ module.exports = (it) => {
             }
         });
 
-        var client = nisper({
-            url: `ws://127.0.0.1:${app.server.address().port}`,
-            onOpen: () => {
-                client.call(['echo', 'hi']);
-            }
+        var httpServer = server.websocketServer._server;
+
+        httpServer.on('listening', () => {
+            client = nisper({
+                url: `ws://127.0.0.1:${httpServer.address().port}`,
+                onOpen: () => {
+                    client.call(['echo', 'hi']);
+                }
+            });
         });
 
         return defer.promise;

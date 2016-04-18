@@ -23,10 +23,9 @@ Node Server:
 ```js
 var nisper = require('nisper');
 var fn = require('nisp/fn/plainSpread');
-var httpServer = require('http').createServer(() => {});
 
 var server = nisper({
-    httpServer: httpServer,
+    wsOption: { port: 8080 },
     sandbox: {
         // define a function, client can call it remotely.
         '+': fn((a, b) => a + b)
@@ -38,8 +37,6 @@ var server = nisper({
         });
     }
 });
-
-httpServer.listen(8080);
 
 ```
 
