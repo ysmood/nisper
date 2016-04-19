@@ -224,4 +224,38 @@ module.exports = (it) => {
         return defer.promise;
     }));
 
+    it('msgpack', async(function * (after) {
+        var msgpack = require('msgpack-js');
+        var app = flow();
+        yield app.listen(0);
+        var defer = kit.Deferred();
+
+        after(() => {
+            client.close();
+            app.close();
+        });
+
+        var server = nisper({
+            httpServer: app.server,
+            encode: msgpack.encode,
+            decode: msgpack.decode,
+            onOpen: () => {
+                server.call(['echo', new Buffer([0, 1, 2, 3])]);
+            }
+        });
+
+        var client = nisper({
+            url: `ws://127.0.0.1:${app.server.address().port}`,
+            encode: msgpack.encode,
+            decode: msgpack.decode,
+            sandbox: {
+                echo: fn((msg) => {
+                    defer.resolve(it.eq(msg, [0, 1, 2, 3]));
+                })
+            }
+        });
+
+        return defer.promise;
+    }));
+
 };

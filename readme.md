@@ -11,10 +11,13 @@ Nisper is a RPC lib based on websocket protocol and nisp language.
 - Safe by design, full control of the user's authority
 - Same api for both node to browser, browser to node and node to node
 - Full support for Promise calls
+- Supports binary data type (json by default)
 - Bidirectional communication
 - Auto reconnect
 
 # Example
+
+For more usage, read the unit test `test/index.js`.
 
 ### Echo Example
 
@@ -67,14 +70,21 @@ client.call(['+', 1, ['+', 1, 1]]).then(res => {
 ```js
 nisper = ({
     httpServer: null,
+
     url: null,
+
     sandbox: {},
+
     onOpen: (connection) => env,
+
     filter: (connection) => Boolean,
+
     isAutoReconnect: true,
     retrySpan: 1000,
-    encode: (Object) => String,
+
+    encode: (Object) => String || Buffer,
     decode: (String) => Object,
+
     wsOption: Object
 }) => {
     sandbox: Object,
