@@ -134,6 +134,34 @@ module.exports = (it) => {
         return defer.promise;
     }));
 
+    it('client call server wait connection', async(function * (after) {
+        var app = flow();
+        yield app.listen(0);
+        var defer = kit.Deferred();
+
+        after(() => {
+            client.close();
+            app.close();
+        });
+
+        var server = nisper({
+            httpServer: app.server,
+            sandbox: {
+                echo: fn((msg) => {
+                    defer.resolve(it.eq(msg, 'hi'));
+                })
+            }
+        });
+
+        var client = nisper({
+            url: `ws://127.0.0.1:${app.server.address().port}`
+        });
+
+        yield client.call(['echo', 'hi']);
+
+        return defer.promise;
+    }));
+
     it('server call client error', async(function * (after) {
         var app = flow();
         yield app.listen(0);
