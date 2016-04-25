@@ -4,6 +4,7 @@ var Promise = kit.Promise;
 var async = kit.async;
 
 var nisper = require('../lib');
+var nisperCall = require('../lib/call');
 var fn = require('nisp/fn/plainSpread');
 
 module.exports = (it) => {
@@ -63,6 +64,37 @@ module.exports = (it) => {
                 onOpen: () => {
                     client.call(['echo', 'hi']);
                 }
+            });
+        });
+
+        return defer.promise;
+    }));
+
+    it('client call server once', async(function * (after) {
+        var defer = kit.Deferred();
+
+        after(() => {
+            server.close();
+        });
+
+        var server = nisper({
+            wsOptions: { port: 0 },
+            sandbox: {
+                echo: fn((msg) => {
+                    return msg;
+                })
+            }
+        });
+
+        var httpServer = server.websocketServer._server;
+
+        httpServer.on('listening', () => {
+            nisperCall(
+                `ws://127.0.0.1:${httpServer.address().port}`,
+                ['echo', 'hi']
+            )
+            .then((msg) => {
+                defer.resolve(it.eq(msg, 'hi'));
             });
         });
 

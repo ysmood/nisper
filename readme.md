@@ -94,3 +94,14 @@ nisper = ({
     call: Function
 };
 ```
+
+### call only once
+
+```js
+var call = require('nisper/lib/call');
+
+
+call('ws://127.0.0.1:8080', ['echo', 'hi']).then(res => {
+    console.log(res);
+});
+```
