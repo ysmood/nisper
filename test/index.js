@@ -144,11 +144,14 @@ module.exports = (it) => {
             app.close();
         });
 
+        var count = 0;
+
         var server = nisper({
             httpServer: app.server,
             sandbox: {
-                echo: fn((msg) => {
-                    defer.resolve(it.eq(msg, 'hi'));
+                echo: fn(() => {
+                    if (++count === 3)
+                        defer.resolve();
                 })
             }
         });
@@ -157,7 +160,9 @@ module.exports = (it) => {
             url: `ws://127.0.0.1:${app.server.address().port}`
         });
 
-        yield client.call(['echo', 'hi']);
+        yield client.call(['echo']);
+        yield client.call(['echo']);
+        yield client.call(['echo']);
 
         return defer.promise;
     }));
