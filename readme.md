@@ -79,6 +79,8 @@ nisper = ({
 
     filter: (connection) => Boolean,
 
+    error: (err) => Error,
+
     isAutoReconnect: true,
     retrySpan: 1000,
 
