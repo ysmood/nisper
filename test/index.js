@@ -22,16 +22,16 @@ module.exports = (it) => {
         var server = nisper({
             httpServer: app.server,
             onOpen: () => {
-                server.call(['echo', 'hi']);
+                server.call(['echo', 'hi']).then(([msg]) => {
+                    defer.resolve(it.eq(msg, 'hi'));
+                });
             }
         });
 
         var client = nisper({
             url: `ws://127.0.0.1:${app.server.address().port}`,
             sandbox: {
-                echo: fn((msg) => {
-                    defer.resolve(it.eq(msg, 'hi'));
-                })
+                echo: fn((msg) => kit.sleep(30, msg))
             }
         });
 
@@ -50,9 +50,7 @@ module.exports = (it) => {
         var server = nisper({
             wsOptions: { port: 0 },
             sandbox: {
-                echo: fn((msg) => {
-                    defer.resolve(it.eq(msg, 'hi'));
-                })
+                echo: fn((msg) => kit.sleep(30, msg))
             }
         });
 
@@ -62,7 +60,9 @@ module.exports = (it) => {
             client = nisper({
                 url: `ws://127.0.0.1:${httpServer.address().port}`,
                 onOpen: () => {
-                    client.call(['echo', 'hi']);
+                    client.call(['echo', 'hi']).then((msg) => {
+                        defer.resolve(it.eq(msg, 'hi'));
+                    });
                 }
             });
         });
