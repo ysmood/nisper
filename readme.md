@@ -28,13 +28,13 @@ var nisper = require('nisper');
 var fn = require('nisp/fn/plainSpread');
 
 var server = nisper({
-    wsOption: { port: 8080 },
+    wsOptions: { port: 8080 },
     sandbox: {
-        // define a function, client can call it remotely.
+        // Define a function, client can call it remotely.
         '+': fn((a, b) => a + b)
     },
     onOpen: () => {
-        // when a client connected, boardcast to all clients.
+        // When a client connected, boardcast to all clients.
         server.call(['-', 2, 1]).then(res => {
             console.log('client res:', res); // => [1]
         });
@@ -42,7 +42,6 @@ var server = nisper({
 });
 
 ```
-
 
 Browser or node client:
 
@@ -53,7 +52,7 @@ var fn = require('nisp/fn/plainSpread');
 var client = nisper({
     url: `ws://127.0.0.1:8080`,
     sandbox: {
-        // define a function, server can call it remotely.
+        // Define a function, server can call it remotely.
         '-': fn((a, b) => a - b)
     }
 });
@@ -64,6 +63,47 @@ client.call(['+', 1, ['+', 1, 1]]).then(res => {
 });
 
 ```
+
+
+### Composable async function
+
+
+```js
+var nisper = require('nisper');
+var fn = require('nisp/fn/plainAsyncSpread');
+
+var server = nisper({
+    wsOptions: { port: 8080 },
+    sandbox: {
+        // Define a function, client can call it remotely.
+        // This add function will return the sum after 1 second.
+        '+': fn((a, b) =>
+            new Promise(resolve =>
+                setTimeout(resolve, 1000, a + b)
+            )
+        )
+    }
+});
+
+```
+
+Browser or node client:
+
+```js
+var nisper = require('nisper');
+
+var client = nisper({
+    url: `ws://127.0.0.1:8080`
+});
+
+           // add(1, add(1, 1))
+client.call(['+', 1, ['+', 1, 1]]).then(res => {
+    // It will log 3 after 2 second.
+    console.log('server res:', res);
+});
+
+```
+
 
 # API
 
@@ -89,7 +129,7 @@ nisper = ({
     encode: (Object) => String || Buffer,
     decode: (String) => Object,
 
-    wsOption: Object
+    wsOptions: Object
 }) => {
     sandbox: Object,
     close: Function,
