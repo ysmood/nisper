@@ -1,6 +1,6 @@
 # Overview
 
-Nisper is a RPC lib based on websocket protocol and nisp language.
+Nisper is a RPC lib based on websocket protocol and [nisp][] language.
 
 [![NPM version](https://badge.fury.io/js/nisper.svg)](http://badge.fury.io/js/nisper) [![Build Status](https://travis-ci.org/ysmood/nisper.svg)](https://travis-ci.org/ysmood/nisper) [![Deps Up to Date](https://david-dm.org/ysmood/nisper.svg?style=flat)](https://david-dm.org/ysmood/nisper)
 
@@ -69,8 +69,10 @@ client.call(['+', 1, ['+', 1, 1]]).then(res => {
 
 ```js
 nisper = ({
+    // node native http.Server
     httpServer: null,
 
+    // string, such as `ws://a.com`
     url: null,
 
     sandbox: {},
@@ -107,3 +109,5 @@ call('ws://127.0.0.1:8080', ['echo', 'hi']).then(res => {
     console.log(res);
 });
 ```
+
+[nisp]: https://github.com/ysmood/nisp
