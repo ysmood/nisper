@@ -2,26 +2,37 @@ var kit = require('nokit');
 var flow = kit.require('proxy').flow;
 var Promise = kit.Promise;
 var async = kit.async;
+var net = require('net');
 
 var nisper = require('../lib');
 var nisperCall = require('../lib/call');
 var fn = require('nisp/fn/plainSpread');
 
+function createServer () {
+    return new Promise(function (resolve, reject) {
+        var server = net.createServer();
+
+        server.listen(0, function () {
+            resolve(server);
+        });
+    });
+}
+
 module.exports = (it) => {
-    it.describe('webosck', function (it) {
+    it.describe('socket', function (it) {
 
         it('server call client', async(function * (after) {
-            var app = flow();
-            yield app.listen(0);
             var defer = kit.Deferred();
+            var socketServer = yield createServer();
 
             after(() => {
                 client.close();
-                app.close();
+                socketServer.close();
             });
 
             var server = nisper({
-                httpServer: app.server,
+                socketServer: socketServer,
+                isWebSocket: false,
                 onOpen: () => {
                     server.call(['echo', 'hi']).then((msgs) => {
                         defer.resolve(it.eq(msgs, ['hi']));
@@ -30,7 +41,9 @@ module.exports = (it) => {
             });
 
             var client = nisper({
-                url: `ws://127.0.0.1:${app.server.address().port}`,
+                port: socketServer.address().port,
+                host: '127.0.0.1',
+                isWebSocket: false,
                 sandbox: {
                     echo: fn((msg) => kit.sleep(30, msg))
                 }
