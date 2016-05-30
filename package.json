@@ -52,9 +52,9 @@
     "extends": "eslint:recommended"
   },
   "devDependencies": {
-    "eslint": "2.8.0",
+    "eslint": "2.11.0",
     "junit": "1.4.1",
     "msgpack-js": "0.3.0",
-    "nokit": "0.20.10"
+    "nokit": "0.20.12"
   }
 }

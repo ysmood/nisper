@@ -22,8 +22,8 @@ module.exports = (it) => {
         var server = nisper({
             httpServer: app.server,
             onOpen: () => {
-                server.call(['echo', 'hi']).then(([msg]) => {
-                    defer.resolve(it.eq(msg, 'hi'));
+                server.call(['echo', 'hi']).then((msgs) => {
+                    defer.resolve(it.eq(msgs, ['hi']));
                 });
             }
         });
@@ -48,13 +48,13 @@ module.exports = (it) => {
         });
 
         var server = nisper({
-            wsOptions: { port: 0 },
+            socketOptions: { port: 0 },
             sandbox: {
                 echo: fn((msg) => kit.sleep(30, msg))
             }
         });
 
-        var httpServer = server.websocketServer._server;
+        var httpServer = server.server._server;
 
         httpServer.on('listening', () => {
             client = nisper({
@@ -78,7 +78,7 @@ module.exports = (it) => {
         });
 
         var server = nisper({
-            wsOptions: { port: 0 },
+            socketOptions: { port: 0 },
             sandbox: {
                 echo: fn((msg) => {
                     return msg;
@@ -86,7 +86,7 @@ module.exports = (it) => {
             }
         });
 
-        var httpServer = server.websocketServer._server;
+        var httpServer = server.server._server;
 
         httpServer.on('listening', () => {
             nisperCall(
