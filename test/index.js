@@ -22,8 +22,8 @@ module.exports = (it) => {
         var server = nisper({
             httpServer: app.server,
             onOpen: () => {
-                server.call(['echo', 'hi']).then(([msg]) => {
-                    defer.resolve(it.eq(msg, 'hi'));
+                server.call(['echo', 'hi']).then((msg) => {
+                    defer.resolve(it.eq(msg[0], 'hi'));
                 });
             }
         });
@@ -116,7 +116,7 @@ module.exports = (it) => {
             onOpen: () => kit.sleep(30, 'ok'),
             sandbox: {
                 echo: fn(function (msg) {
-                    defer.resolve(it.eq(this + msg, 'ok!'));
+                    setTimeout(defer.resolve, 30, it.eq(this + msg, 'ok!'));
                 })
             }
         });
@@ -149,7 +149,7 @@ module.exports = (it) => {
                 echo: fn(() => {
                     count++;
                     if (count === 100)
-                        defer.resolve();
+                        setTimeout(defer.resolve, 30);
                 })
             }
         });
@@ -183,7 +183,7 @@ module.exports = (it) => {
             sandbox: {
                 echo: fn(() => {
                     if (++count === 3)
-                        defer.resolve();
+                        setTimeout(defer.resolve, 30);
                 })
             }
         });
@@ -288,6 +288,38 @@ module.exports = (it) => {
             sandbox: {
                 echo: fn((msg) => {
                     defer.resolve(it.eq(msg, [0, 1, 2, 3]));
+                })
+            }
+        });
+
+        return defer.promise;
+    }));
+
+    it('timeout', async(function * (after) {
+        var app = flow();
+        yield app.listen(0);
+        var defer = kit.Deferred();
+
+        after(() => {
+            client.close();
+            app.close();
+        });
+
+        var server = nisper({
+            httpServer: app.server,
+            timeout: 100,
+            onOpen: () => {
+                server.call(['echo']).catch(function (err) {
+                    defer.resolve(it.eq(err.message, 'timeout'));
+                });
+            }
+        });
+
+        var client = nisper({
+            url: `ws://127.0.0.1:${app.server.address().port}`,
+            sandbox: {
+                echo: fn((msg) => {
+                    return kit.never();
                 })
             }
         });

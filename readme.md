@@ -125,6 +125,7 @@ nisper = ({
 
     isAutoReconnect: true,
     retrySpan: 1000,
+    timeout: 1000 * 60 * 2,
 
     encode: (Object) => String || Buffer,
     decode: (String) => Object,
