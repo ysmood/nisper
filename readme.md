@@ -119,6 +119,8 @@ nisper = ({
 
     onOpen: (connection) => env,
 
+    onRequest: () => env,
+
     filter: (connection) => Boolean,
 
     error: (err) => Error,
@@ -136,6 +138,7 @@ nisper = ({
     close: Function,
     websocketClient: Object,
     webSocketServer: Object,
+    middleware: Function,
     call: Function
 };
 ```
