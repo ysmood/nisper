@@ -1,5 +1,7 @@
 var kit = require('nokit');
-var flow = kit.require('proxy').flow;
+var proxy = kit.require('proxy');
+var flow = proxy.flow;
+var midToFlow = proxy.midToFlow;
 var Promise = kit.Promise;
 var async = kit.async;
 
@@ -323,6 +325,36 @@ module.exports = (it) => {
                 })
             }
         });
+
+        return defer.promise;
+    }));
+
+    it('middleware', async(function * (after) {
+        var app = flow();
+        yield app.listen(0);
+        var defer = kit.Deferred();
+
+        after(() => {
+            app.close();
+        });
+
+        var server = nisper({
+            httpServer: app.server,
+            sandbox: {
+                echo: fn((msg) => {
+                    return msg;
+                })
+            }
+        });
+
+        app.push(midToFlow(server.middleware));
+
+        var ret = yield kit.request({
+            url: `http://127.0.0.1:${app.server.address().port}`,
+            reqData: JSON.stringify(["echo", 'hey'])
+        });
+
+        defer.resolve(it.eq(JSON.parse(ret), { result: 'hey' }));
 
         return defer.promise;
     }));
