@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "nisp": "0.6.1",
-    "ws": "1.1.0",
+    "ws": "1.1.1",
     "yaku": "0.16.1"
   },
   "files": [
