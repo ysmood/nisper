@@ -40,7 +40,7 @@ module.exports = (it) => {
         return defer.promise;
     }));
 
-    it('client call server', async(function * (after) {
+    it('client call server', function (after) {
         var defer = kit.Deferred();
         var client;
 
@@ -70,9 +70,9 @@ module.exports = (it) => {
         });
 
         return defer.promise;
-    }));
+    });
 
-    it('client call server once', async(function * (after) {
+    it('client call server once', function (after) {
         var defer = kit.Deferred();
 
         after(() => {
@@ -101,7 +101,7 @@ module.exports = (it) => {
         });
 
         return defer.promise;
-    }));
+    });
 
     it('async env', async(function * (after) {
         var app = flow();

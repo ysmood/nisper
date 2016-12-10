@@ -5,7 +5,7 @@ module.exports = (task) => {
     });
 
     task('lint', () => {
-        kit.spawn('eslint', ['lib', 'test']);
+        return kit.spawn('eslint', ['lib', 'test']);
     });
 
     task('test', () => {
