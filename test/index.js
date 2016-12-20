@@ -40,6 +40,42 @@ module.exports = (it) => {
         return defer.promise;
     }));
 
+    it('wrong response encode', async(function * (after) {
+        var app = flow();
+        yield app.listen(0);
+        var defer = kit.Deferred();
+
+        after(() => {
+            client.close();
+            app.close();
+        });
+
+        var server = nisper({
+            httpServer: app.server,
+            onOpen: () => {
+                server.call(['echo']).catch(function (err) {
+                    defer.resolve(
+                        it.eq(JSON.parse(err.message).message[0],
+                        'TypeError: Converting circular structure to JSON'
+                    ));
+                });
+            }
+        });
+
+        var client = nisper({
+            url: `ws://127.0.0.1:${app.server.address().port}`,
+            sandbox: {
+                echo: function () {
+                    var a = {};
+                    a.a = a;
+                    return a;
+                }
+            }
+        });
+
+        return defer.promise;
+    }));
+
     it('client call server', function (after) {
         var defer = kit.Deferred();
         var client;
@@ -279,7 +315,7 @@ module.exports = (it) => {
             encode: msgpack.encode,
             decode: msgpack.decode,
             onOpen: () => {
-                server.call(['echo', new Buffer([0, 1, 2, 3])]);
+                server.call(['echo', { msg: new Buffer([0, 1, 2, 3]) }]);
             }
         });
 
@@ -288,8 +324,8 @@ module.exports = (it) => {
             encode: msgpack.encode,
             decode: msgpack.decode,
             sandbox: {
-                echo: fn((msg) => {
-                    defer.resolve(it.eq(msg, [0, 1, 2, 3]));
+                echo: fn((data) => {
+                    defer.resolve(it.eq(data.msg, [0, 1, 2, 3]));
                 })
             }
         });
