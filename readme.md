@@ -132,7 +132,9 @@ nisper = ({
     encode: (Object) => String || Buffer,
     decode: (String) => Object,
 
-    wsOptions: Object
+    wsOptions: Object,
+
+    isDebug: false
 }) => {
     sandbox: Object,
     close: Function,
