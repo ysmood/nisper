@@ -139,7 +139,7 @@ nisper = ({
     sandbox: Object,
     close: Function,
     websocketClient: Object,
-    webSocketServer: Object,
+    websocketServer: Object,
     middleware: Function,
     call: Function
 };
