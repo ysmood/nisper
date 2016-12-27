@@ -54,7 +54,8 @@
   "devDependencies": {
     "eslint": "3.12.2",
     "junit": "1.4.7",
-    "msgpack-js": "0.3.0",
-    "nokit": "0.23.11"
+    "msgpack-lite": "0.1.26",
+    "nokit": "0.23.11",
+    "webpack": "^1.14.0"
   }
 }
