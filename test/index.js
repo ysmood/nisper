@@ -23,9 +23,9 @@ module.exports = (it) => {
 
         var server = nisper({
             httpServer: app.server,
-            onOpen: () => {
-                server.callx`(echo "hi")`.then((msg) => {
-                    defer.resolve(it.eq(msg[0], 'hi'));
+            onOpen: (ws) => {
+                server.callx(ws)`(echo ${'hi'})`.then((msg) => {
+                    defer.resolve(it.eq(msg, 'hi'));
                 });
             }
         });
@@ -52,8 +52,8 @@ module.exports = (it) => {
 
         var server = nisper({
             httpServer: app.server,
-            onOpen: () => {
-                server.call(['echo']).catch(function (err) {
+            onOpen: (ws) => {
+                server.call(ws, ['echo']).catch(function (err) {
                     defer.resolve(
                         it.eq(JSON.parse(err.message).message[0],
                         'TypeError: Converting circular structure to JSON'
@@ -249,8 +249,8 @@ module.exports = (it) => {
 
         var server = nisper({
             httpServer: app.server,
-            onOpen: () => {
-                server.call(['echo', 'hi']).catch((err) => {
+            onOpen: (ws) => {
+                server.call(ws, ['echo', 'hi']).catch((err) => {
                     defer.resolve(it.eq(JSON.parse(err.message).message, 'err'));
                 });
             }
@@ -300,7 +300,7 @@ module.exports = (it) => {
     }));
 
     it('msgpack', async(function * (after) {
-        var msgpack = require('msgpack-js');
+        var msgpack = require('msgpack-lite');
         var app = flow();
         yield app.listen(0);
         var defer = kit.Deferred();
@@ -314,8 +314,8 @@ module.exports = (it) => {
             httpServer: app.server,
             encode: msgpack.encode,
             decode: msgpack.decode,
-            onOpen: () => {
-                server.call(['echo', { msg: new Buffer([0, 1, 2, 3]) }]);
+            onOpen: (ws) => {
+                server.call(ws, ['echo', { msg: new Buffer([0, 1, 2, 3]) }]);
             }
         });
 
@@ -346,8 +346,8 @@ module.exports = (it) => {
         var server = nisper({
             httpServer: app.server,
             timeout: 100,
-            onOpen: () => {
-                server.call(['echo']).catch(function (err) {
+            onOpen: (ws) => {
+                server.call(ws, ['echo']).catch(function (err) {
                     defer.resolve(it.eq(err.message, 'timeout'));
                 });
             }

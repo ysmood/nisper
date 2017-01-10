@@ -33,10 +33,10 @@ var server = nisper({
         // Define a function, client can call it remotely.
         '+': fn((a, b) => a + b)
     },
-    onOpen: () => {
-        // When a client connected, boardcast to all clients.
-        server.call(['-', 2, 1]).then(res => {
-            console.log('client res:', res); // => [1]
+    onOpen: (ws) => {
+        // When a client connected, call it
+        server.call(ws, ['-', 2, 1]).then(res => {
+            console.log('client res:', res); // => 1
         });
     }
 });
@@ -65,15 +65,18 @@ client.call(['+', 1, ['+', 1, 1]]).then(res => {
 ```
 
 
-### Composable async function
+### Composable async function & msgpack
 
 
 ```js
 var nisper = require('nisper');
 var fn = require('nisp/fn/plainAsyncSpread');
+var msgpack = require('msgpack-lite')
 
 var server = nisper({
     wsOptions: { port: 8080 },
+    encode: msgpack.encode,
+    decode: msgpack.decode,
     sandbox: {
         // Define a function, client can call it remotely.
         // This add function will return the sum after 1 second.
@@ -94,6 +97,8 @@ var nisper = require('nisper');
 
 var client = nisper({
     url: `ws://127.0.0.1:8080`
+    encode: msgpack.encode,
+    decode: msgpack.decode
 });
 
            // add(1, add(1, 1))
@@ -139,7 +144,7 @@ nisper = ({
     sandbox: Object,
     close: Function,
     websocketClient: Object,
-    webSocketServer: Object,
+    websocketServer: Object,
     middleware: Function,
     call: Function
 };
