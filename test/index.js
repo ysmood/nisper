@@ -24,7 +24,7 @@ module.exports = (it) => {
         var server = nisper({
             httpServer: app.server,
             onOpen: () => {
-                server.call(['echo', 'hi']).then((msg) => {
+                server.callx`(echo "hi")`.then((msg) => {
                     defer.resolve(it.eq(msg[0], 'hi'));
                 });
             }
@@ -98,7 +98,7 @@ module.exports = (it) => {
             client = nisper({
                 url: `ws://127.0.0.1:${httpServer.address().port}`,
                 onOpen: () => {
-                    client.call(['echo', 'hi']).then((msg) => {
+                    client.callx`(echo "hi")`.then((msg) => {
                         defer.resolve(it.eq(msg, 'hi'));
                     });
                 }

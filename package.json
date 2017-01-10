@@ -1,6 +1,6 @@
 {
   "name": "nisper",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "A RPC lib based on websocket protocol and nisp language",
   "main": "lib/index.js",
   "scripts": {
@@ -10,9 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "nisp": "0.7.0",
+    "nisp": "0.8.1",
     "ws": "1.1.1",
-    "yaku": "0.17.4"
+    "yaku": "0.17.8"
   },
   "files": [
     "lib"
@@ -52,9 +52,9 @@
     "extends": "eslint:recommended"
   },
   "devDependencies": {
-    "eslint": "3.12.2",
-    "junit": "1.4.7",
+    "eslint": "3.13.1",
+    "junit": "1.4.8",
     "msgpack-js": "0.3.0",
-    "nokit": "0.23.11"
+    "nokit": "0.23.18"
   }
 }
