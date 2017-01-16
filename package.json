@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "nisp": "0.8.3",
+    "nisp": "0.9.2",
     "ws": "1.1.1",
     "yaku": "0.17.8"
   },
@@ -53,7 +53,7 @@
   },
   "devDependencies": {
     "eslint": "3.13.1",
-    "junit": "1.4.8",
+    "junit": "1.4.9",
     "msgpack-lite": "0.1.26",
     "nokit": "0.23.18",
     "webpack": "1.14.0"
