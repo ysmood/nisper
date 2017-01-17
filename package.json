@@ -1,8 +1,8 @@
 {
   "name": "nisper",
-  "version": "0.5.4",
+  "version": "0.6.0",
   "description": "A RPC lib based on websocket protocol and nisp language",
-  "main": "lib/index.js",
+  "main": "lib/index",
   "scripts": {
     "test": "no test",
     "prepublish": "no lint"
@@ -10,52 +10,19 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "nisp": "0.9.2",
+    "nisp": "0.9.6",
     "ws": "1.1.1",
     "yaku": "0.17.8"
   },
   "files": [
-    "lib"
+    "lib/**/*.{js,d.ts}"
   ],
-  "eslintConfig": {
-    "parserOptions": {
-      "ecmaVersion": 5
-    },
-    "rules": {
-      "indent": [
-        2,
-        4
-      ],
-      "linebreak-style": [
-        2,
-        "unix"
-      ],
-      "semi": [
-        2,
-        "always"
-      ],
-      "no-trailing-spaces": 2,
-      "space-before-function-paren": [
-        2,
-        "always"
-      ],
-      "no-unused-vars": 0,
-      "eqeqeq": [
-        2,
-        "allow-null"
-      ]
-    },
-    "env": {
-      "browser": true,
-      "node": true
-    },
-    "extends": "eslint:recommended"
-  },
   "devDependencies": {
-    "eslint": "3.13.1",
+    "@types/node": "^7.0.0",
     "junit": "1.4.9",
     "msgpack-lite": "0.1.26",
     "nokit": "0.23.18",
+    "typescript": "^2.1.5",
     "webpack": "1.14.0"
   }
 }

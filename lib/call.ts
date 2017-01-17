@@ -1,14 +1,14 @@
-var nisper = require('./index');
+import nisper from './index';
 
-module.exports = function (url, nisp, opts) {
+export default (url, nisp, opts?) => {
     if (!opts) opts = {};
 
     opts.url = url;
     opts.isAutoReconnect = false;
 
-    var client = nisper(opts);
+    const client = nisper(opts);
 
-    return client.call(nisp).then(function (res) {
+    return client.call(nisp).then(res => {
         client.close();
 
         return res;

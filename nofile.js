@@ -1,12 +1,13 @@
 var kit = require('nokit');
 
 module.exports = (task) => {
-    task('default', () => {
+    task("build", function () {
+        return kit.spawn('tsc')
     });
 
-    task('lint', () => {
-        return kit.spawn('eslint', ['lib']);
-    });
+    task('default dev', function () {
+        return kit.spawn('tsc', ['-w'])
+    })
 
     task('test', () => {
         return kit.spawn('junit', ['test/index.js']);

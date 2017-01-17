@@ -1,15 +1,11 @@
-var nisper = require('../lib');
+import kit from 'nokit';
+const { flow, select } = kit.require('proxy');
+import msgpack from 'msgpack-lite';
+import {Server as WebsocketServer} from 'ws';
 
-var kit = require('nokit');
-var { flow, midToFlow, select } = kit.require('proxy');
-var msgpack = require('msgpack-lite');
-var WebsocketServer = require('ws').Server;
+const app = flow();
 
-var fn = require('nisp/fn/plainSpread');
-
-var app = flow();
-
-var wss = new WebsocketServer({ server: app.server });
+const wss = new WebsocketServer({ server: app.server });
 
 wss.on('connection', (ws) => {
     ws.binaryType = 'arraybuffer';
