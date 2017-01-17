@@ -5,7 +5,7 @@
   "main": "lib/index",
   "scripts": {
     "test": "no test",
-    "prepublish": "no lint"
+    "prepublish": "no build"
   },
   "author": "",
   "license": "ISC",
