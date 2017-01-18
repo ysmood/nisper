@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "nisp": "0.9.6",
+    "nisp": "0.9.8",
     "ws": "1.1.1",
     "yaku": "0.17.8"
   },
@@ -18,11 +18,11 @@
     "lib/**/*.{js,d.ts}"
   ],
   "devDependencies": {
-    "@types/node": "^7.0.0",
+    "@types/node": "7.0.0",
     "junit": "1.4.9",
     "msgpack-lite": "0.1.26",
     "nokit": "0.23.18",
-    "typescript": "^2.1.5",
+    "typescript": "2.1.5",
     "webpack": "1.14.0"
   }
 }

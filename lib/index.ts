@@ -15,7 +15,7 @@ function extend (to, from) {
     return to;
 }
 
-export default opts => {
+export default function (opts) {
     opts = extend({
         httpServer: null,
         url: null,
