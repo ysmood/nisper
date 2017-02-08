@@ -15,7 +15,23 @@ function extend (to, from) {
     return to;
 }
 
-export default function (opts) {
+export default function (opts: {
+    httpServer?: any
+    url?: string
+    sandbox?: {},
+    onOpen?: (ws) => any
+    onRequest?: (req, res) => any 
+    filter?: (any) => boolean
+    error?: (err) => any
+    isAutoReconnect?: boolean
+    binaryType?: 'arraybuffer'
+    retrySpan?: number
+    timeout?: number
+    encode?:(data) => any
+    decode?:(data) => any
+    wsOptions?: {}
+    isDebug?: boolean
+}) {
     opts = extend({
         httpServer: null,
         url: null,
