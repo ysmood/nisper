@@ -300,6 +300,44 @@ module.exports = (it) => {
         return defer.promise;
     }));
 
+    it('client call server maxPlayload', async(function* (after) {
+        var app = flow();
+        yield app.listen(0);
+        var defer = kit.Deferred();
+        var out;
+        after(function () {
+            client.close();
+            app.close();
+        });
+        nisper({
+            httpServer: app.server,
+            wsOptions: {
+                maxPayload: 10
+            },
+            onOpen: function (ws) {
+                ws.onerror = function (e) {
+                    out = e.message;
+                };
+            },
+            sandbox: {
+                echo: function () { }
+            }
+        });
+        var client = nisper({
+            url: "ws://127.0.0.1:" + app.server.address().port,
+            onOpen: function () {
+                client.call(['echo', '12345678901234567890'])["catch"](function (e) {
+                    defer.resolve(it.eq([out, JSON.parse(e.message)], ['max payload size exceeded', {
+                            "code": 1009,
+                            "message": "websocket message too big"
+                        }]));
+                });
+            }
+        });
+        return defer.promise;
+    }));
+
+
     it('msgpack', async(function * (after) {
         var msgpack = require('msgpack-lite');
         var app = flow();

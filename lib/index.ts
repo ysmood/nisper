@@ -2,6 +2,7 @@
 import Nisp from 'nisp';
 import nispEncode from 'nisp/lib/encode'
 import Promise from 'yaku';
+import * as ErrorCodes from 'ws/lib/ErrorCodes'
 
 function genId () {
     return Math.floor(Math.random() * 100000000).toString(36);
@@ -184,18 +185,25 @@ export default function (opts: {
         });
     }
 
-    function close (code?, reason?) {
-        isAutoReconnect = false;
-
+    function wsError (code: number, reason: string) {
         sendQueue.length = 0;
-
         const ids = [];
-        for (const id in sessions) {
+        for (let id in sessions) {
             ids.push(id);
         }
         ids.forEach(id => {
-            sessionDone(id, { error: { message: 'client closed' } });
+            sessionDone(id, { error: {
+                code,
+                message: reason
+            } });
         });
+    }
+
+    function close (code?: number, reason?: string) {
+        isAutoReconnect = false
+        clearTimeout(reconnectTimer)
+
+        wsError(code, reason)
 
         if (isClient)
             wsClient.close(code, reason);
@@ -204,13 +212,14 @@ export default function (opts: {
     }
 
     // If url is specified, init the client instance, else init the a server instance.
+    let reconnectTimer
     if (isClient) {
         const connect = () => {
             try {
                 wsClient = new WS(url);
             } catch (err) {
                 if (isAutoReconnect) {
-                    return setTimeout(connect, retrySpan);
+                    return reconnectTimer = setTimeout(connect, retrySpan);
                 } else {
                     throw err;
                 }
@@ -229,9 +238,12 @@ export default function (opts: {
                     e.data instanceof ArrayBuffer ? new Uint8Array(e.data) : e.data
                 );
             };
-            wsClient.onclose = () => {
+
+            wsClient.onerror = wsClient.onclose = (e) => {
+                wsError(e.code, 'websocket ' + ErrorCodes[e.code])
+
                 if (isAutoReconnect) {
-                    setTimeout(connect, retrySpan);
+                    reconnectTimer = setTimeout(connect, retrySpan);
                 }
             };
         };

@@ -10,19 +10,19 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "nisp": "0.9.8",
-    "ws": "1.1.1",
+    "nisp": "0.9.9",
+    "ws": "2.0.3",
     "yaku": "0.17.8"
   },
   "files": [
     "lib/**/*.{js,d.ts}"
   ],
   "devDependencies": {
-    "@types/node": "7.0.0",
+    "@types/node": "7.0.5",
     "junit": "1.4.9",
     "msgpack-lite": "0.1.26",
-    "nokit": "0.23.18",
-    "typescript": "2.1.5",
-    "webpack": "1.14.0"
+    "nokit": "0.23.22",
+    "typescript": "2.1.6",
+    "webpack": "2.2.1"
   }
 }
