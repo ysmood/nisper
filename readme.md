@@ -19,6 +19,8 @@ Nisper is a RPC lib based on websocket protocol and [nisp][] language.
 
 For more usage, read the unit test `test/index.js`.
 
+Live Demo: https://runkit.com/ysmood/nisper2
+
 ### Echo Example
 
 Node Server:
@@ -136,7 +138,8 @@ nisper = ({
     encode: (Object) => String || Buffer,
     decode: (String) => Object,
 
-    wsOptions: Object, // Same options as ws: https://github.com/websockets/ws/blob/master/doc/ws.md#new-websocketserveroptions-callback
+    // Same options as ws: https://github.com/websockets/ws/blob/master/doc/ws.md
+    wsOptions: Object,
 
     isDebug: false
 }) => {
