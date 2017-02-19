@@ -93,6 +93,7 @@ Browser or node client:
 
 ```js
 import nisper from 'nisper';
+import msgpack from 'msgpack-lite';
 
 const client = nisper({
     url: `ws://127.0.0.1:8080`,
@@ -135,7 +136,7 @@ nisper = ({
     encode: (Object) => String || Buffer,
     decode: (String) => Object,
 
-    wsOptions: Object,
+    wsOptions: Object, // Same options as ws: https://github.com/websockets/ws/blob/master/doc/ws.md#new-websocketserveroptions-callback
 
     isDebug: false
 }) => {
