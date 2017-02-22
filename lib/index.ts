@@ -6,7 +6,7 @@ import * as ErrorCodes from 'ws/lib/ErrorCodes'
 import options, { Options } from './options'
 import { extend, genId } from './utils'
 import { Sandbox } from 'nisp'
-import { Server } from 'ws'
+import * as WebSocket from 'ws'
 import middleware from './middleware'
 import { ServerRequest, ServerResponse } from 'http'
 
@@ -18,7 +18,7 @@ export default function (opts: Options) {
     const WS = typeof WebSocket === 'undefined' ? eval('require')('ws') : WebSocket;
     let clientCall;
     let clientCallx;
-    let wsServer: Server;
+    let wsServer: WebSocket.Server;
     let wsClient: WebSocket;
     const sessions = {};
     const isClient = typeof opts.url === 'string';
@@ -172,7 +172,7 @@ export default function (opts: Options) {
                     send(wsClient, msg)
                 }
 
-                wsClient.binaryType = opts.binaryType;
+                wsClient['binaryType'] = opts.binaryType;
 
                 const onMessage = genOnMessage(wsClient, opts.onOpen(wsClient));
                 wsClient.onmessage = e => onMessage(
@@ -209,7 +209,7 @@ export default function (opts: Options) {
         wsServer.on('connection', ws => {
             if (!opts.filter(ws)) return;
             ws['binaryType'] = opts.binaryType;
-            ws.on('message', genOnMessage(ws, opts.onOpen(ws as any)));
+            ws.on('message', genOnMessage(ws, opts.onOpen(ws)));
         });
 
         clientCall = call;

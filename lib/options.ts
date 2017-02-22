@@ -1,6 +1,6 @@
 import { Sandbox } from 'nisp'
 import { Server } from 'http'
-import { IServerOptions } from 'ws'
+import * as WebSocket from 'ws'
 import { extend } from './utils'
 
 export type Options = {
@@ -17,7 +17,7 @@ export type Options = {
     timeout?: number
     encode?:(data) => any
     decode?:(data) => any
-    wsOptions?: IServerOptions
+    wsOptions?: WebSocket.IServerOptions
     isDebug?: boolean
 }
 
