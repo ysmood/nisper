@@ -7,7 +7,7 @@
         "**/*.js": {
             "when": "$(basename).ts"
         },
-        "**/*.d.ts": {
+        "lib/**/*.d.ts": {
             "when": "$(basename).ts"
         }
     }

@@ -1,4 +1,3 @@
-
 import Nisp from 'nisp';
 import nispEncode from 'nisp/lib/encode'
 import Promise from 'yaku';
@@ -6,7 +5,7 @@ import * as ErrorCodes from 'ws/lib/ErrorCodes'
 import options, { Options } from './options'
 import { extend, genId } from './utils'
 import { Sandbox } from 'nisp'
-import * as WebSocket from 'ws'
+import * as WebSocket from '../types/ws'
 import middleware from './middleware'
 import { ServerRequest, ServerResponse } from 'http'
 
@@ -15,7 +14,6 @@ export { Sandbox, ServerRequest, ServerResponse }
 export default function (opts: Options) {
     opts = options(opts)
 
-    const WS = typeof WebSocket === 'undefined' ? eval('require')('ws') : WebSocket;
     let clientCall;
     let clientCallx;
     let wsServer: WebSocket.Server;
@@ -154,7 +152,7 @@ export default function (opts: Options) {
     if (isClient) {
         const connect = () => {
             try {
-                wsClient = new (WS)(opts.url);
+                wsClient = new WebSocket(opts.url);
             } catch (err) {
                 if (opts.isAutoReconnect) {
                     return reconnectTimer = setTimeout(connect, opts.retrySpan);
@@ -172,7 +170,7 @@ export default function (opts: Options) {
                     send(wsClient, msg)
                 }
 
-                wsClient['binaryType'] = opts.binaryType;
+                wsClient.binaryType = opts.binaryType;
 
                 const onMessage = genOnMessage(wsClient, opts.onOpen(wsClient));
                 wsClient.onmessage = e => onMessage(
@@ -201,14 +199,14 @@ export default function (opts: Options) {
         };
     } else {
         if (opts.httpServer) {
-            wsServer = new WS.Server(extend(opts.wsOptions, { server: opts.httpServer }));
+            wsServer = new WebSocket.Server(extend(opts.wsOptions, { server: opts.httpServer }));
         } else {
-            wsServer = new WS.Server(opts.wsOptions);
+            wsServer = new WebSocket.Server(opts.wsOptions);
         }
 
         wsServer.on('connection', ws => {
             if (!opts.filter(ws)) return;
-            ws['binaryType'] = opts.binaryType;
+            ws.binaryType = opts.binaryType;
             ws.on('message', genOnMessage(ws, opts.onOpen(ws)));
         });
 
