@@ -1,5 +1,5 @@
 node_modules
 dist
 *.log
-/**/*.d.ts
+/lib/**/*.d.ts
 /lib/**/*.js
