@@ -3,93 +3,30 @@ import Nisp from 'nisp';
 import nispEncode from 'nisp/lib/encode'
 import Promise from 'yaku';
 import * as ErrorCodes from 'ws/lib/ErrorCodes'
+import options, { Options } from './options'
+import { extend, genId } from './utils'
+import { Sandbox } from 'nisp'
+import { Server } from 'ws'
+import middleware from './middleware'
+import { ServerRequest, ServerResponse } from 'http'
 
-function genId () {
-    return Math.floor(Math.random() * 100000000).toString(36);
-}
+export { Sandbox, ServerRequest, ServerResponse }
 
-function extend (to, from) {
-    let k;
-    for (k in from) {
-        to[k] = from[k];
-    }
-    return to;
-}
-
-export default function (opts: {
-    httpServer?: any
-    url?: string
-    sandbox?: {},
-    onOpen?: (ws) => any
-    onRequest?: (req, res) => any 
-    filter?: (any) => boolean
-    error?: (err) => any
-    isAutoReconnect?: boolean
-    binaryType?: 'arraybuffer'
-    retrySpan?: number
-    timeout?: number
-    encode?:(data) => any
-    decode?:(data) => any
-    wsOptions?: {}
-    isDebug?: boolean
-}) {
-    opts = extend({
-        httpServer: null,
-        url: null,
-        sandbox: {},
-        onOpen(ws) {
-            return ws;
-        },
-        onRequest(req) {
-            return req;
-        },
-        filter() {
-            return true;
-        },
-        error(err) {
-            return err instanceof Error ? err.stack.split('\n') : err;
-        },
-        isAutoReconnect: true,
-        binaryType: 'arraybuffer',
-        retrySpan: 1000,
-        timeout: 1000 * 60 * 2, // 2 minutes
-        encode(data) {
-            return JSON.stringify(data, null, 4);
-        },
-        decode(data) {
-            return JSON.parse(`${data}`);
-        },
-        wsOptions: {},
-        isDebug: false
-    }, opts);
-
-    const httpServer = opts.httpServer;
-    const url = opts.url;
-    const sandbox = opts.sandbox;
-    const onOpen = opts.onOpen;
-    const onRequest = opts.onRequest;
-    const filter = opts.filter;
-    const error = opts.error;
-    let isAutoReconnect = opts.isAutoReconnect;
-    const retrySpan = opts.retrySpan;
-    const timeout = opts.timeout;
-    const encode = opts.encode;
-    const decode = opts.decode;
-    const wsOptions = opts.wsOptions;
-    const isDebug = opts.isDebug;
+export default function (opts: Options) {
+    opts = options(opts)
 
     const WS = typeof WebSocket === 'undefined' ? eval('require')('ws') : WebSocket;
     let clientCall;
     let clientCallx;
-    let wsServer;
-    let wsClient;
+    let wsServer: Server;
+    let wsClient: WebSocket;
     const sessions = {};
-    const isClient = typeof url === 'string';
+    const isClient = typeof opts.url === 'string';
     const sendQueue = [];
 
     function send (ws, msg) {
         if (ws.readyState === 1) {
-            const data = encode(msg);
+            const data = opts.encode(msg);
             ws.send(data);
         } else {
             sendQueue.push(msg);
@@ -98,7 +35,7 @@ export default function (opts: {
 
     function genOnMessage (ws, env) {
         return msg => {
-            const data = decode(msg);
+            const data = opts.decode(msg);
             const type = data.type;
             const id = data.id;
             const nisp = data.nisp;
@@ -109,7 +46,7 @@ export default function (opts: {
             }
 
             return Promise.resolve(env).then(env => {
-                return Nisp(nisp, sandbox, env);
+                return Nisp(nisp, opts.sandbox, env);
             }).then(result => {
                 send(ws, {
                     type: 'response',
@@ -121,7 +58,7 @@ export default function (opts: {
                     type: 'response',
                     id,
                     error: {
-                        message: error(err)
+                        message: opts.error(err)
                     }
                 });
             });
@@ -146,7 +83,7 @@ export default function (opts: {
         if (!session) return;
 
         if (data.error) {
-            if (isDebug) {
+            if (opts.isDebug) {
                 session.error.message = JSON.stringify(data.error, null, 4);
                 session.reject(session.error);
             } else {
@@ -168,7 +105,7 @@ export default function (opts: {
             nisp
         };
 
-        if (isDebug)
+        if (opts.isDebug)
             var error = new Error();
 
         return new Promise((resolve, reject) => {
@@ -177,15 +114,16 @@ export default function (opts: {
             sessions[id] = {
                 resolve,
                 reject,
-                timer: setTimeout(deleteRpcSession, timeout, id, reject)
+                timer: setTimeout(deleteRpcSession, opts.timeout, id, reject)
             };
 
-            if (isDebug)
+            if (opts.isDebug)
                 sessions[id].error = error;
         });
     }
 
     function wsError (code: number, reason: string) {
+        opts.isAutoReconnect = false;
         sendQueue.length = 0;
         const ids = [];
         for (let id in sessions) {
@@ -200,7 +138,7 @@ export default function (opts: {
     }
 
     function close (code?: number, reason?: string) {
-        isAutoReconnect = false
+        opts.isAutoReconnect = false
         clearTimeout(reconnectTimer)
 
         wsError(code, reason)
@@ -216,10 +154,10 @@ export default function (opts: {
     if (isClient) {
         const connect = () => {
             try {
-                wsClient = new WS(url);
+                wsClient = new (WS)(opts.url);
             } catch (err) {
-                if (isAutoReconnect) {
-                    return reconnectTimer = setTimeout(connect, retrySpan);
+                if (opts.isAutoReconnect) {
+                    return reconnectTimer = setTimeout(connect, opts.retrySpan);
                 } else {
                     throw err;
                 }
@@ -232,20 +170,22 @@ export default function (opts: {
 
                 wsClient.binaryType = opts.binaryType;
 
-                const onMessage = genOnMessage(wsClient, onOpen(wsClient));
+                const onMessage = genOnMessage(wsClient, opts.onOpen(wsClient));
                 wsClient.onmessage = e => onMessage(
                     // eslint-disable-next-line
                     e.data instanceof ArrayBuffer ? new Uint8Array(e.data) : e.data
                 );
             };
 
-            wsClient.onerror = wsClient.onclose = (e) => {
+            let onClose = (e) => {
                 wsError(e.code, 'websocket ' + ErrorCodes[e.code])
 
-                if (isAutoReconnect) {
-                    reconnectTimer = setTimeout(connect, retrySpan);
+                if (opts.isAutoReconnect) {
+                    reconnectTimer = setTimeout(connect, opts.retrySpan);
                 }
             };
+            wsClient.onerror = onClose
+            wsClient.onclose = onClose
         };
 
         connect();
@@ -256,16 +196,16 @@ export default function (opts: {
             return clientCall(nisp, true);
         };
     } else {
-        if (httpServer) {
-            wsServer = new WS.Server(extend(wsOptions, { server: httpServer }));
+        if (opts.httpServer) {
+            wsServer = new WS.Server(extend(opts.wsOptions, { server: opts.httpServer }));
         } else {
-            wsServer = new WS.Server(wsOptions);
+            wsServer = new WS.Server(opts.wsOptions);
         }
 
         wsServer.on('connection', ws => {
-            if (!filter(ws)) return;
-            ws.binaryType = opts.binaryType;
-            ws.on('message', genOnMessage(ws, onOpen(ws)));
+            if (!opts.filter(ws)) return;
+            ws['binaryType'] = opts.binaryType;
+            ws.on('message', genOnMessage(ws, opts.onOpen(ws as any)));
         });
 
         clientCall = call;
@@ -275,43 +215,12 @@ export default function (opts: {
         };
     }
 
-    function middleware (req, res) {
-        return Promise.all([
-            onRequest(req, res),
-            new Promise((resolve, reject) => {
-                let buf = new Buffer(0);
-                req.on('data', chunk => {
-                    buf = Buffer.concat([buf, chunk]);
-                });
-                req.on('error', reject);
-                req.on('end', () => {
-                    resolve(buf);
-                });
-            })
-        ]).then(ret => {
-            const env = ret[0];
-            const nisp = decode(ret[1]);
-
-            return Nisp(nisp, sandbox, env);
-        }).then(result => {
-            res.end(encode({
-                result
-            }));
-        }, err => {
-            res.end(encode({
-                error: {
-                    message: error(err)
-                }
-            }));
-        });
-    }
-
     return {
-        sandbox,
+        sandbox: opts.sandbox,
         close,
         websocketServer: wsServer,
         websocketClient: wsClient,
-        middleware,
+        middleware: middleware(opts),
         call: clientCall,
         callx: clientCallx
     };

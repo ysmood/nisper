@@ -11,14 +11,15 @@
   "license": "ISC",
   "dependencies": {
     "nisp": "0.9.9",
-    "ws": "2.0.3",
-    "yaku": "0.17.8"
+    "ws": "2.1.0",
+    "yaku": "0.17.8",
+    "@types/node": "7.0.0",
+    "@types/ws": "0.0.38"
   },
   "files": [
     "lib/**/*.{js,d.ts}"
   ],
   "devDependencies": {
-    "@types/node": "7.0.5",
     "junit": "1.4.9",
     "msgpack-lite": "0.1.26",
     "nokit": "0.23.22",
