@@ -164,8 +164,12 @@ export default function (opts: Options) {
             }
 
             wsClient.onopen = () => {
-                while (sendQueue.length > 0) {
-                    send(wsClient, sendQueue.pop());
+                // clear pending queue
+                // we must clone it to prevent the infinite loop when readyState is not 1
+                let queue = sendQueue.concat()
+                sendQueue.length = 0
+                for (let msg of queue) {
+                    send(wsClient, msg)
                 }
 
                 wsClient.binaryType = opts.binaryType;
