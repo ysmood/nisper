@@ -329,7 +329,7 @@ module.exports = (it) => {
                 client.call(['echo', '12345678901234567890'])["catch"](function (e) {
                     defer.resolve(it.eq([out, JSON.parse(e.message)], ['max payload size exceeded', {
                             "code": 1009,
-                            "message": "websocket message too big"
+                            "message": "websocket error: message too big"
                         }]));
                 });
             }

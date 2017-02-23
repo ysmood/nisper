@@ -180,7 +180,7 @@ export default function (opts: Options) {
             };
 
             let onClose = (e) => {
-                wsError(e.code, 'websocket ' + ErrorCodes[e.code])
+                wsError(e.code, 'websocket error: ' + ErrorCodes[e.code])
 
                 if (opts.isAutoReconnect) {
                     reconnectTimer = setTimeout(connect, opts.retrySpan);
