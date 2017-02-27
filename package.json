@@ -1,6 +1,6 @@
 {
   "name": "nisper",
-  "version": "0.6.13",
+  "version": "0.6.15",
   "description": "A RPC lib based on websocket protocol and nisp language",
   "main": "lib/index",
   "scripts": {
@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "nisp": "0.9.11",
+    "nisp": "0.9.13",
     "ws": "2.1.0",
     "@types/node": "7.0.0",
     "yaku": "0.17.7"
