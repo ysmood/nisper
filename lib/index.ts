@@ -121,7 +121,6 @@ export default function (opts: Options) {
     }
 
     function wsError (code: number, reason: string) {
-        opts.isAutoReconnect = false;
         sendQueue.length = 0;
         const ids = [];
         for (let id in sessions) {
