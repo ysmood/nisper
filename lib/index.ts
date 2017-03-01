@@ -178,15 +178,13 @@ export default function (opts: Options) {
                 );
             };
 
-            let onClose = (e) => {
+            wsClient.onerror = (e: any) => {
                 wsError(e.code, 'websocket error: ' + ErrorCodes[e.code])
 
                 if (opts.isAutoReconnect) {
                     reconnectTimer = setTimeout(connect, opts.retrySpan);
                 }
-            };
-            wsClient.onerror = onClose
-            wsClient.onclose = onClose
+            }
         };
 
         connect();
