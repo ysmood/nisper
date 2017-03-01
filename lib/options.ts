@@ -8,6 +8,7 @@ export type Options = {
     url?: string
     sandbox?: Sandbox,
     onOpen?: (ws: WebSocket) => any
+    onError?: (err) => void
     onRequest?: (req, res) => any
     filter?: (any) => boolean
     error?: (err) => any
@@ -28,6 +29,9 @@ export default (opts: Options) => {
         sandbox: {},
         onOpen(ws) {
             return ws;
+        },
+        onError(err) {
+            console.error(err)
         },
         onRequest(req) {
             return req;

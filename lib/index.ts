@@ -1,10 +1,9 @@
-import Nisp from 'nisp';
+import Nisp, { Sandbox } from 'nisp';
 import nispEncode from 'nisp/lib/encode'
 import Promise from 'yaku';
 import * as ErrorCodes from 'ws/lib/ErrorCodes'
 import options, { Options } from './options'
 import { extend, genId } from './utils'
-import { Sandbox } from 'nisp'
 import * as WebSocket from '../types/ws'
 import middleware from './middleware'
 import { ServerRequest, ServerResponse } from 'http'
@@ -29,19 +28,10 @@ export default function (opts: Options) {
     } = {};
     const isClient = typeof opts.url === 'string';
     const sendQueue: {
-        type: 'request' | 'response',
-        id: string,
         nisp: any
+        resolve: (v) => any
+        reject: (r) => any
     }[] = [];
-
-    function send (ws, msg) {
-        if (ws.readyState === 1) {
-            const data = opts.encode(msg);
-            ws.send(data);
-        } else {
-            sendQueue.push(msg);
-        }
-    }
 
     function genOnMessage (ws, env) {
         return ({ data: msg }) => {
@@ -59,23 +49,23 @@ export default function (opts: Options) {
                 return;
             }
 
-            return Promise.resolve(env).then(env => {
-                return Nisp(nisp, opts.sandbox, env);
-            }).then(result => {
-                send(ws, {
+            Promise.resolve(env).then(env =>
+                Nisp(nisp, opts.sandbox, env)
+            ).then(result => {
+                ws.send(opts.encode({
                     type: 'response',
                     id,
                     result
-                });
+                }));
             }).catch(err => {
-                send(ws, {
+                ws.send(opts.encode({
                     type: 'response',
                     id,
                     error: {
                         message: opts.error(err)
                     }
-                });
-            });
+                }));
+            }).catch(opts.onError)
         };
     }
 
@@ -117,20 +107,18 @@ export default function (opts: Options) {
     }
 
     function call (ws, nisp) {
-        const id = genId();
-
-        const callData = {
-            type: 'request',
-            id,
-            nisp
-        };
-
         if (opts.isDebug)
             var error = new Error();
 
         return new Promise((resolve, reject) => {
-            send(ws, callData);
+            if (isClient && ws.readyState !== 1) {
+                sendQueue.push({
+                    nisp, resolve, reject
+                })
+                return
+            }
 
+            let id = genId();
             sessions[id] = {
                 resolve,
                 reject,
@@ -140,11 +128,14 @@ export default function (opts: Options) {
 
             if (opts.isDebug)
                 sessions[id].error = error;
+
+            ws.send(opts.encode({
+                type: 'request', id, nisp
+            }))
         });
     }
 
     function wsError (code: number, reason: string) {
-        sendQueue.length = 0;
         const ids = [];
         for (let id in sessions) {
             ids.push(id);
@@ -186,11 +177,10 @@ export default function (opts: Options) {
             wsClient.onopen = () => {
                 // clear pending queue
                 // we must clone it to prevent the infinite loop when readyState is not 1
-                let queue = sendQueue.concat()
-                sendQueue.length = 0
-                for (let msg of queue) {
-                    send(wsClient, msg)
+                for (let msg of sendQueue) {
+                    call(wsClient, msg.nisp).then(msg.resolve, msg.reject)
                 }
+                sendQueue.length = 0
 
                 wsClient.binaryType = opts.binaryType;
 
@@ -224,7 +214,8 @@ export default function (opts: Options) {
         wsServer.on('connection', ws => {
             if (!opts.filter(ws)) return;
             ws.binaryType = opts.binaryType;
-            ws.onerror = (err) => {
+            ws.onerror = () => {}
+            ws.onclose = (err) => {
                 deleteRpcSessions(ws)
                 opts.error(err)
             }
