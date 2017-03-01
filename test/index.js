@@ -3,7 +3,7 @@ var proxy = kit.require('proxy');
 var flow = proxy.flow;
 var midToFlow = proxy.midToFlow;
 var Promise = kit.Promise;
-var async = kit.async;
+var $async = kit.async;
 var $ = require('nisp/lib/$').default;
 
 var nisper = require('../lib').default;
@@ -11,7 +11,7 @@ var nisperCall = require('../lib/call').default;
 
 module.exports = (it) => {
 
-    it('server call client', async(function * (after) {
+    it('server call client', $async(function * (after) {
         var app = flow();
         yield app.listen(0);
         var defer = kit.Deferred();
@@ -41,7 +41,7 @@ module.exports = (it) => {
         return defer.promise;
     }));
 
-    it('wrong response encode', async(function * (after) {
+    it('wrong response encode', $async(function * (after) {
         var app = flow();
         yield app.listen(0);
         var defer = kit.Deferred();
@@ -140,7 +140,7 @@ module.exports = (it) => {
         return defer.promise;
     });
 
-    it('async env', async(function * (after) {
+    it('async env', $async(function * (after) {
         var app = flow();
         yield app.listen(0);
         var defer = kit.Deferred();
@@ -170,7 +170,7 @@ module.exports = (it) => {
         return defer.promise;
     }));
 
-    it('client call server multiple times', async(function * (after) {
+    it('client call server multiple times', $async(function * (after) {
         var app = flow();
         yield app.listen(0);
         var defer = kit.Deferred();
@@ -205,7 +205,7 @@ module.exports = (it) => {
         return defer.promise;
     }));
 
-    it('client call server wait connection', async(function * (after) {
+    it('client call server wait connection', $async(function * (after) {
         var app = flow();
         yield app.listen(0);
         var defer = kit.Deferred();
@@ -238,7 +238,7 @@ module.exports = (it) => {
         return defer.promise;
     }));
 
-    it('server call client error', async(function * (after) {
+    it('server call client error', $async(function * (after) {
         var app = flow();
         yield app.listen(0);
         var defer = kit.Deferred();
@@ -269,7 +269,7 @@ module.exports = (it) => {
         return defer.promise;
     }));
 
-    it('client call server error', async(function * (after) {
+    it('client call server error', $async(function * (after) {
         var app = flow();
         yield app.listen(0);
         var defer = kit.Deferred();
@@ -300,7 +300,7 @@ module.exports = (it) => {
         return defer.promise;
     }));
 
-    it('client call server maxPlayload', async(function* (after) {
+    it('client call server maxPayload', $async(function* (after) {
         var app = flow();
         yield app.listen(0);
         var defer = kit.Deferred();
@@ -326,19 +326,29 @@ module.exports = (it) => {
         var client = nisper({
             url: "ws://127.0.0.1:" + app.server.address().port,
             onOpen: function () {
-                client.call(['echo', '12345678901234567890'])["catch"](function (e) {
-                    defer.resolve(it.eq([out, JSON.parse(e.message)], ['max payload size exceeded', {
-                            "code": 1009,
-                            "message": "websocket error: message too big"
-                        }]));
-                });
+                client.call(['echo', '12345678901234567890']).then(
+                    () => {
+                        defer.reject("should throw error")
+                    },
+                    (e) => {
+                        defer.resolve(
+                            it.eq(
+                                [out, JSON.parse(e.message)],
+                                ['max payload size exceeded', {
+                                    "code": 1009,
+                                    "message": "websocket error: message too big"
+                                }]
+                            )
+                        );
+                    }
+                );
             }
         });
         return defer.promise;
     }));
 
 
-    it('msgpack', async(function * (after) {
+    it('msgpack', $async(function * (after) {
         var msgpack = require('msgpack-lite');
         var app = flow();
         yield app.listen(0);
@@ -372,7 +382,7 @@ module.exports = (it) => {
         return defer.promise;
     }));
 
-    it('timeout', async(function * (after) {
+    it('timeout', $async(function * (after) {
         var app = flow();
         yield app.listen(0);
         var defer = kit.Deferred();
@@ -404,7 +414,7 @@ module.exports = (it) => {
         return defer.promise;
     }));
 
-    it('middleware', async(function * (after) {
+    it('middleware', $async(function * (after) {
         var app = flow();
         yield app.listen(0);
         var defer = kit.Deferred();
