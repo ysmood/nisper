@@ -1,29 +1,22 @@
-var nisper = require('../lib');
+var nisper = require('../lib').default;
 
 var kit = require('nokit');
 var ws = require('ws')
 var WebsocketServer = ws.Server;
 
-var wss = new WebsocketServer({
-    maxPayload: 2,
-    port: 8080
-});
-
-wss.on('connection', (ws) => {
-    ws.onmessage = (e) => {
-        console.log(e.data)
+var server = nisper({
+    wsOptions: {
+        port: 8080,
+        maxPayload: 3
     }
-    ws.onerror = (e) => console.log('###', e.message)
-});
+})
 
-
-var c = new ws('ws://127.0.0.1:8080')
-
-c.onclose = (e) => {
-    console.log('*****', e.code)
-}
+var c = nisper({
+    url: 'ws://127.0.0.1:8080',
+})
 
 setTimeout(() => {
-    c.send('1234567890')
+    c.call(['asdlkfjasldfjslkfjlsjdflksj']).catch((err) => {
+        console.log(err.message)
+    })
 }, 1000)
-

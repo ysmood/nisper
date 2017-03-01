@@ -304,7 +304,6 @@ module.exports = (it) => {
         var app = flow();
         yield app.listen(0);
         var defer = kit.Deferred();
-        var out;
         after(function () {
             client.close();
             app.close();
@@ -313,11 +312,6 @@ module.exports = (it) => {
             httpServer: app.server,
             wsOptions: {
                 maxPayload: 10
-            },
-            onOpen: function (ws) {
-                ws.onerror = function (e) {
-                    out = e.message;
-                };
             },
             sandbox: {
                 echo: function () { }
@@ -331,13 +325,11 @@ module.exports = (it) => {
                         defer.reject("should throw error")
                     },
                     (e) => {
+                        var err = JSON.parse(e.message)
                         defer.resolve(
                             it.eq(
-                                [out, JSON.parse(e.message)],
-                                ['max payload size exceeded', {
-                                    "code": 1009,
-                                    "message": "websocket error: message too big"
-                                }]
+                                [err.code, err.message[0]],
+                                [1009, 'Error: message too big']
                             )
                         );
                     }
@@ -346,7 +338,6 @@ module.exports = (it) => {
         });
         return defer.promise;
     }));
-
 
     it('msgpack', $async(function * (after) {
         var msgpack = require('msgpack-lite');

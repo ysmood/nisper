@@ -38,7 +38,6 @@ export default function (opts: Options) {
         if (ws.readyState === 1) {
             const data = opts.encode(msg);
             ws.send(data);
-            console.log('******222', data)
         } else {
             sendQueue.push(msg);
         }
@@ -153,7 +152,7 @@ export default function (opts: Options) {
         ids.forEach(id => {
             sessionDone(id, { error: {
                 code,
-                message: reason
+                message: opts.error(new Error(reason))
             } });
         });
     }
@@ -198,8 +197,9 @@ export default function (opts: Options) {
                 wsClient.onmessage = genOnMessage(wsClient, opts.onOpen(wsClient))
             };
 
-            wsClient.onerror = (e: any) => {
-                wsError(e.code, 'websocket error: ' + ErrorCodes[e.code])
+            wsClient.onerror = () => {}
+            wsClient.onclose = (e: any) => {
+                wsError(e.code, ErrorCodes[e.code])
 
                 if (opts.isAutoReconnect) {
                     reconnectTimer = setTimeout(connect, opts.retrySpan);
@@ -224,10 +224,7 @@ export default function (opts: Options) {
         wsServer.on('connection', ws => {
             if (!opts.filter(ws)) return;
             ws.binaryType = opts.binaryType;
-            console.log('******11')
             ws.onerror = (err) => {
-                console.log('******44', err)
-                
                 deleteRpcSessions(ws)
                 opts.error(err)
             }
