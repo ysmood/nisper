@@ -33,6 +33,10 @@ export default function (opts: Options) {
 
     function genOnMessage (ws, env) {
         return msg => {
+            if (msg instanceof ArrayBuffer) {
+                msg = new Uint8Array(msg)
+            }
+
             const data = opts.decode(msg);
             const type = data.type;
             const id = data.id;
@@ -172,10 +176,7 @@ export default function (opts: Options) {
                 wsClient.binaryType = opts.binaryType;
 
                 const onMessage = genOnMessage(wsClient, opts.onOpen(wsClient));
-                wsClient.onmessage = e => onMessage(
-                    // eslint-disable-next-line
-                    e.data instanceof ArrayBuffer ? new Uint8Array(e.data) : e.data
-                );
+                wsClient.onmessage = e => onMessage(e.data)
             };
 
             wsClient.onerror = (e: any) => {
