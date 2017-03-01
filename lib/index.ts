@@ -1,6 +1,7 @@
 import Nisp, { Sandbox } from 'nisp';
 import nispEncode from 'nisp/lib/encode'
 import Promise from 'yaku';
+import * as promisify from 'yaku/lib/promisify'
 import * as ErrorCodes from 'ws/lib/ErrorCodes'
 import options, { Options } from './options'
 import { extend, genId } from './utils'
@@ -155,9 +156,9 @@ export default function (opts: Options) {
         wsError(code, reason)
 
         if (isClient)
-            wsClient.close(code, reason);
+            return Promise.resolve(wsClient.close(code, reason));
         else
-            wsServer.close();
+            return promisify(wsServer.close, wsServer)()
     }
 
     // If url is specified, init the client instance, else init the a server instance.

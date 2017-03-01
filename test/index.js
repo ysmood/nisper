@@ -335,6 +335,50 @@ module.exports = (it) => {
         return defer.promise;
     }));
 
+    it('auto reconnect after connection', $async(function * (after) {
+        var app = flow();
+        yield app.listen(0);
+        var port = app.server.address().port
+        yield app.close()
+
+        var defer = kit.Deferred();
+        var server
+
+        after(() => {
+            client.close()
+            server.close()
+        });
+
+        server = nisper({
+            wsOptions: { port },
+            sandbox: {
+                echo: (msg) => msg
+            }
+        })
+
+        var client = nisper({
+            url: `ws://127.0.0.1:${port}`,
+            retrySpan: 100,
+            onOpen: kit._.once($async(function* () {
+                yield server.close()
+
+                client.call(['echo', 'ok']).then((val) => {
+                    defer.resolve(it.eq(val, 'ok'))
+                }, () => {})
+
+                setTimeout(() => {
+                    server = nisper({
+                        wsOptions: { port },
+                        sandbox: {
+                            echo: (msg) => msg
+                        }
+                    })
+                }, 300)
+            }))
+        });
+
+        return defer.promise;
+    }));
 
     it('client call server maxPayload', $async(function* (after) {
         var app = flow();
