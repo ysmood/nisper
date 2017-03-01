@@ -13,7 +13,7 @@ wss.on('connection', (ws) => {
     ws.onmessage = (e) => {
         console.log(e.data)
     }
-    ws.onerror = (e) => console.log(e.message)
+    ws.onerror = (e) => console.log('###', e.message)
 });
 
 

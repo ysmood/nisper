@@ -38,6 +38,7 @@ export default function (opts: Options) {
         if (ws.readyState === 1) {
             const data = opts.encode(msg);
             ws.send(data);
+            console.log('******222', data)
         } else {
             sendQueue.push(msg);
         }
@@ -223,7 +224,10 @@ export default function (opts: Options) {
         wsServer.on('connection', ws => {
             if (!opts.filter(ws)) return;
             ws.binaryType = opts.binaryType;
+            console.log('******11')
             ws.onerror = (err) => {
+                console.log('******44', err)
+                
                 deleteRpcSessions(ws)
                 opts.error(err)
             }

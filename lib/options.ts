@@ -43,7 +43,7 @@ export default (opts: Options) => {
         retrySpan: 1000,
         timeout: 1000 * 60 * 2, // 2 minutes
         encode(data) {
-            return JSON.stringify(data, null, 4);
+            return JSON.stringify(data);
         },
         decode(data) {
             return JSON.parse(data + '');
