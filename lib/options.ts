@@ -46,7 +46,7 @@ export default (opts: Options) => {
             return JSON.stringify(data, null, 4);
         },
         decode(data) {
-            return JSON.parse(`${data}`);
+            return JSON.parse(data + '');
         },
         wsOptions: {},
         isDebug: false

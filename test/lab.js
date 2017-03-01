@@ -1,35 +1,29 @@
 var nisper = require('../lib');
 
 var kit = require('nokit');
-var { flow, midToFlow, select } = kit.require('proxy');
-var msgpack = require('msgpack-lite');
-var WebsocketServer = require('ws').Server;
+var ws = require('ws')
+var WebsocketServer = ws.Server;
 
-var fn = require('nisp/fn/plainSpread');
-
-var app = flow();
-
-var wss = new WebsocketServer({ server: app.server });
-
-wss.on('connection', (ws) => {
-    ws.binaryType = 'arraybuffer';
-    ws.send(
-        msgpack.encode({a: 1, b: new Buffer([1,2,3])})
-    );
-
-    ws.on('message', (d) => {
-        kit.logs(msgpack.decode(d));
-    });
+var wss = new WebsocketServer({
+    maxPayload: 2,
+    port: 8080
 });
 
-app.push(select('/js', ctx => ctx.body = kit.readFile(kit.path.join(__dirname, './a.js'))));
+wss.on('connection', (ws) => {
+    ws.onmessage = (e) => {
+        console.log(e.data)
+    }
+    ws.onerror = (e) => console.log(e.message)
+});
 
-app.push(select('/', ctx => {
-    ctx.body = `
-        <html>
-            <script src='/js'></script>
-        </html>
-    `;
-}));
 
-app.listen(8000);
+var c = new ws('ws://127.0.0.1:8080')
+
+c.onclose = (e) => {
+    console.log('*****', e.code)
+}
+
+setTimeout(() => {
+    c.send('1234567890')
+}, 1000)
+

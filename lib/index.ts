@@ -18,9 +18,21 @@ export default function (opts: Options) {
     let clientCallx;
     let wsServer: WebSocket.Server;
     let wsClient: WebSocket;
-    const sessions = {};
+    const sessions: {
+        [id: string]: {
+            resolve: (v) => any
+            reject: (r) => any
+            timer: any
+            ws: any
+            error?: any
+        }
+    } = {};
     const isClient = typeof opts.url === 'string';
-    const sendQueue = [];
+    const sendQueue: {
+        type: 'request' | 'response',
+        id: string,
+        nisp: any
+    }[] = [];
 
     function send (ws, msg) {
         if (ws.readyState === 1) {
@@ -32,7 +44,7 @@ export default function (opts: Options) {
     }
 
     function genOnMessage (ws, env) {
-        return msg => {
+        return ({ data: msg }) => {
             if (msg instanceof ArrayBuffer) {
                 msg = new Uint8Array(msg)
             }
@@ -67,16 +79,22 @@ export default function (opts: Options) {
         };
     }
 
-    function deleteRpcSession (id, reject?) {
+    function deleteRpcSession (id) {
         const session = sessions[id];
 
         if (!session) return;
 
         clearTimeout(session.timer);
         delete sessions[id];
+        session.reject(new Error('timeout'));
+    }
 
-        if (reject)
-            reject(new Error('timeout'));
+    function deleteRpcSessions (ws) {
+        for (let id in sessions) {
+            if (sessions[id].ws === ws) {
+                deleteRpcSession(id)
+            }
+        }
     }
 
     function sessionDone (id, data) {
@@ -116,7 +134,8 @@ export default function (opts: Options) {
             sessions[id] = {
                 resolve,
                 reject,
-                timer: setTimeout(deleteRpcSession, opts.timeout, id, reject)
+                ws,
+                timer: setTimeout(deleteRpcSession, opts.timeout, id)
             };
 
             if (opts.isDebug)
@@ -175,8 +194,7 @@ export default function (opts: Options) {
 
                 wsClient.binaryType = opts.binaryType;
 
-                const onMessage = genOnMessage(wsClient, opts.onOpen(wsClient));
-                wsClient.onmessage = e => onMessage(e.data)
+                wsClient.onmessage = genOnMessage(wsClient, opts.onOpen(wsClient))
             };
 
             wsClient.onerror = (e: any) => {
@@ -205,7 +223,11 @@ export default function (opts: Options) {
         wsServer.on('connection', ws => {
             if (!opts.filter(ws)) return;
             ws.binaryType = opts.binaryType;
-            ws.on('message', genOnMessage(ws, opts.onOpen(ws)));
+            ws.onerror = (err) => {
+                deleteRpcSessions(ws)
+                opts.error(err)
+            }
+            ws.onmessage = genOnMessage(ws, opts.onOpen(ws));
         });
 
         clientCall = call;
