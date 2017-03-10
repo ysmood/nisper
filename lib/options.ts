@@ -40,7 +40,7 @@ export default (opts: Options) => {
             return true;
         },
         error(err) {
-            return err instanceof Error ? err.stack.split('\n') : err;
+            return err + ''
         },
         isAutoReconnect: true,
         binaryType: 'arraybuffer',

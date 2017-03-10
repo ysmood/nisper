@@ -5,6 +5,7 @@ var midToFlow = proxy.midToFlow;
 var Promise = kit.Promise;
 var $async = kit.async;
 var $ = require('nisp/lib/$').default;
+var nispError = require('nisp').error
 
 var nisper = require('../lib').default;
 var nisperCall = require('../lib/call').default;
@@ -56,9 +57,11 @@ module.exports = (it) => {
             onOpen: (ws) => {
                 server.call(ws, ['echo']).catch(function (err) {
                     defer.resolve(
-                        it.eq(JSON.parse(err.message).message[0],
-                        'TypeError: Converting circular structure to JSON'
-                    ));
+                        it.eq(
+                            err.message,
+                            'TypeError: Converting circular structure to JSON'
+                        )
+                    );
                 });
             }
         });
@@ -252,7 +255,7 @@ module.exports = (it) => {
             httpServer: app.server,
             onOpen: (ws) => {
                 server.call(ws, ['echo', 'hi']).catch((err) => {
-                    defer.resolve(it.eq(JSON.parse(err.message).message, 'err'));
+                    defer.resolve(it.eq(err.message, 'err'));
                 });
             }
         });
@@ -282,8 +285,8 @@ module.exports = (it) => {
         var server = nisper({
             httpServer: app.server,
             sandbox: {
-                echo: (msg) => {
-                    throw 'err';
+                echo: function (msg) {
+                    nispError(this, msg)
                 }
             }
         });
@@ -292,7 +295,7 @@ module.exports = (it) => {
             url: `ws://127.0.0.1:${app.server.address().port}`,
             onOpen: () => {
                 client.call(['echo', 'hi']).catch((err) => {
-                    defer.resolve(it.eq(JSON.parse(err.message).message, 'err'));
+                    defer.resolve(it.eq(err.message, 'nisp hi\nstack: [\n    "echo",\n    0\n]'));
                 });
             }
         });
@@ -404,12 +407,11 @@ module.exports = (it) => {
                     () => {
                         defer.reject("should throw error")
                     },
-                    (e) => {
-                        var err = JSON.parse(e.message)
+                    (err) => {
                         defer.resolve(
                             it.eq(
-                                [err.code, err.message[0]],
-                                [1009, 'Error: message too big']
+                                [err.code, err.message],
+                                [1009, 'message too big']
                             )
                         );
                     }

@@ -24,7 +24,7 @@ export default function (opts: Options) {
             reject: (r) => any
             timer: any
             ws: any
-            error?: any
+            error?: Error
         }
     } = {};
     const isClient = typeof opts.url === 'string';
@@ -95,10 +95,10 @@ export default function (opts: Options) {
 
         if (data.error) {
             if (opts.isDebug) {
-                session.error.message = JSON.stringify(data.error, null, 4);
+                session.error.message = data.error;
                 session.reject(session.error);
             } else {
-                session.reject(new Error(JSON.stringify(data.error, null, 4)));
+                session.reject(data.error);
             }
         } else {
             session.resolve(data.result);
@@ -144,7 +144,7 @@ export default function (opts: Options) {
         ids.forEach(id => {
             sessionDone(id, { error: {
                 code,
-                message: opts.error(new Error(reason))
+                message: reason
             } });
         });
     }
@@ -216,9 +216,8 @@ export default function (opts: Options) {
             if (!opts.filter(ws)) return;
             ws.binaryType = opts.binaryType;
             ws.onerror = () => {}
-            ws.onclose = (err) => {
+            ws.onclose = () => {
                 deleteRpcSessions(ws)
-                opts.error(err)
             }
             ws.onmessage = genOnMessage(ws, opts.onOpen(ws));
         });
