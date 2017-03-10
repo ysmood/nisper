@@ -95,7 +95,8 @@ export default function (opts: Options) {
 
         if (data.error) {
             if (opts.isDebug) {
-                session.error.message = data.error;
+                session.error.message = data.error.message;
+                session.error['code'] = data.error.code;
                 session.reject(session.error);
             } else {
                 session.reject(data.error);
