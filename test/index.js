@@ -295,7 +295,7 @@ module.exports = (it) => {
             url: `ws://127.0.0.1:${app.server.address().port}`,
             onOpen: () => {
                 client.call(['echo', 'hi']).catch((err) => {
-                    defer.resolve(it.eq(err.message, 'nisp hi\nstack: [\n    "echo",\n    0\n]'));
+                    defer.resolve(it.eq(err.message, 'nisp error: hi\nstack: [\n    "echo",\n    0\n]'));
                 });
             }
         });
