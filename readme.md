@@ -127,8 +127,6 @@ nisper = ({
 
     onRequest: () => env,
 
-    filter: (connection) => Boolean,
-
     error: (err) => Error,
 
     isAutoReconnect: true,
