@@ -214,7 +214,6 @@ export default function (opts: Options) {
         }
 
         wsServer.on('connection', ws => {
-            if (!opts.filter(ws)) return;
             ws.binaryType = opts.binaryType;
             ws.onerror = () => {}
             ws.onclose = () => {

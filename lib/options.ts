@@ -10,7 +10,6 @@ export type Options = {
     onOpen?: (ws: WebSocket) => any
     onError?: (err) => void
     onRequest?: (req, res) => any
-    filter?: (any) => boolean
     error?: (err) => any
     isAutoReconnect?: boolean
     binaryType?: 'arraybuffer'
@@ -35,9 +34,6 @@ export default (opts: Options) => {
         },
         onRequest(req) {
             return req;
-        },
-        filter() {
-            return true;
         },
         error(err) {
             return err + ''
