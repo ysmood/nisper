@@ -517,4 +517,67 @@ module.exports = (it) => {
         return defer.promise;
     }));
 
+    it('multiple ws paths', $async(function * (after) {
+        kit.require('url')
+
+        var app = flow();
+        yield app.listen(0);
+
+        after(() => {
+            fooClient.close();
+            barClient.close();
+            app.close();
+        });
+
+        let fooServer = nisper({
+            wsOptions: {
+                noServer: true,
+            },
+            sandbox: {
+                echo: () => 'foo'
+            }
+        });
+
+        let barServer = nisper({
+            wsOptions: {
+                noServer: true,
+             },
+            sandbox: {
+                echo: () => 'bar'
+            }
+        });
+
+
+        app.server.on('upgrade', (req, sock, head) => {
+            let pathname = kit.url.parse(req.url).pathname;
+
+            if (pathname === '/foo')
+                fooServer.websocketServer.handleUpgrade(req, sock, head, (ws) => {
+                    fooServer.websocketServer.emit('connection', ws)
+                })
+            else if (pathname === '/bar')
+                barServer.websocketServer.handleUpgrade(req, sock, head, (ws) => {
+                    barServer.websocketServer.emit('connection', ws)
+                })
+            else
+                sock.destroy()
+         })
+
+        var fooClient = nisper({
+            url: `ws://127.0.0.1:${app.server.address().port}/foo`,
+        });
+
+        var barClient = nisper({
+            url: `ws://127.0.0.1:${app.server.address().port}/bar`,
+        });
+
+        return it.eq([
+            yield fooClient.callx`(echo)`,
+            yield barClient.callx`(echo)`
+        ], [
+            'foo',
+            'bar'
+        ]);
+    }));
+
 };
