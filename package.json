@@ -1,6 +1,6 @@
 {
   "name": "nisper",
-  "version": "0.6.26",
+  "version": "0.6.27",
   "description": "A RPC lib based on websocket protocol and nisp language",
   "main": "lib/index",
   "scripts": {
@@ -20,12 +20,15 @@
   },
   "files": [
     "lib/**/*.{js,d.ts}",
-    "types"
+    "types",
+    "dist/nisper.js",
+    "dist/nisper.min.js"
   ],
   "devDependencies": {
     "junit": "1.4.9",
     "msgpack-lite": "0.1.26",
     "nokit": "0.23.26",
-    "typescript": "2.2.2"
+    "typescript": "2.2.2",
+    "webpack": "^2.3.2"
   }
 }

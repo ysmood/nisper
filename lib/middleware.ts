@@ -4,6 +4,7 @@ import { ServerRequest, ServerResponse } from 'http'
 import { Options } from './options'
 
 export default (opts: Options) => {
+    var Buffer = global['Buffer']
 
     return (req: ServerRequest, res: ServerResponse) => {
         return Promise.all([
