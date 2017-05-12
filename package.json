@@ -10,10 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ws": "2.2.0",
-    "yaku": "0.17.9",
+    "ws": "2.3.1",
+    "yaku": "0.18.0",
     "nisp": "0.11.6",
-    "@types/node": "7.0.12"
+    "@types/node": "7.0.18"
   },
   "nofile": {
     "autoInstallDeps": true
@@ -28,7 +28,7 @@
     "junit": "1.4.9",
     "msgpack-lite": "0.1.26",
     "nokit": "0.23.26",
-    "typescript": "2.2.2",
+    "typescript": "2.3.2",
     "webpack": "^2.3.2"
   }
 }
