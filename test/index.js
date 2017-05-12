@@ -364,21 +364,23 @@ module.exports = (it) => {
             retrySpan: 100,
             onOpen: kit._.once($async(function* () {
                 yield server.close()
-
-                client.call(['echo', 'ok']).then((val) => {
-                    defer.resolve(it.eq(val, 'ok'))
-                }, () => {})
-
-                setTimeout(() => {
-                    server = nisper({
-                        wsOptions: { port },
-                        sandbox: {
-                            echo: (msg) => msg
-                        }
-                    })
-                }, 300)
             }))
         });
+
+        client.websocketClient.on('close', () => {
+            client.call(['echo', 'ok']).then((val) => {
+                defer.resolve(it.eq(val, 'ok'))
+            }, () => {})
+
+            setTimeout(() => {
+                server = nisper({
+                    wsOptions: { port },
+                    sandbox: {
+                        echo: (msg) => msg
+                    }
+                })
+            }, 300)
+        })
 
         return defer.promise;
     }));
