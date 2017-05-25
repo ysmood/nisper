@@ -5,6 +5,7 @@ var midToFlow = proxy.midToFlow;
 var Promise = kit.Promise;
 var $async = kit.async;
 var $ = require('nisp/lib/$').default;
+var $def = require('nisp/lib/def').default;
 var nispError = require('nisp').error
 
 var nisper = require('../lib').default;
@@ -92,6 +93,7 @@ module.exports = (it) => {
         var server = nisper({
             wsOptions: { port: 0 },
             sandbox: {
+                def: $def,
                 echo: (msg) => kit.sleep(30, msg)
             }
         });
@@ -105,6 +107,43 @@ module.exports = (it) => {
                     client.callx`(echo hi)`.then((msg) => {
                         defer.resolve(it.eq(msg, 'hi'));
                     });
+                }
+            });
+        });
+
+        return defer.promise;
+    });
+
+    it('clean sandbox', function (after) {
+        var defer = kit.Deferred();
+        var client;
+
+        after(() => {
+            client.close();
+            server.close();
+        });
+
+        var server = nisper({
+            wsOptions: { port: 0 },
+            sandbox: {
+                def: $def,
+            }
+        });
+
+        var httpServer = server.websocketServer._server;
+
+        httpServer.on('listening', () => {
+            client = nisper({
+                url: `ws://127.0.0.1:${httpServer.address().port}`,
+                onOpen: () => {
+                    client.callx`(def msg hi)`.then(() => {
+                        client.callx`(msg)`.catch((err) => {
+                            defer.resolve(it.eq(
+                                err.message.split('\n')[0],
+                                'NispError: function "msg" is undefined'
+                            ));
+                        });
+                    })
                 }
             });
         });
@@ -295,7 +334,7 @@ module.exports = (it) => {
             url: `ws://127.0.0.1:${app.server.address().port}`,
             onOpen: () => {
                 client.call(['echo', 'hi']).catch((err) => {
-                    defer.resolve(it.eq(err.message, 'nisp error: hi\nstack: [\n    "echo",\n    0\n]'));
+                    defer.resolve(it.eq(err.message, 'NispError: hi\nstack: [\n    "echo",\n    0\n]'));
                 });
             }
         });

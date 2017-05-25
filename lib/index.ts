@@ -51,7 +51,8 @@ export default function (opts: Options) {
             }
 
             Promise.resolve(env).then(env =>
-                Nisp(nisp, opts.sandbox, env)
+                // clone sandbox for each call
+                Nisp(nisp, extend({}, opts.sandbox), env)
             ).then(result => {
                 ws.send(opts.encode({
                     type: 'response',
