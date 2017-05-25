@@ -7,7 +7,7 @@ export type Options = {
     httpServer?: Server
     url?: string
     sandbox?: Sandbox,
-    onOpen?: (ws: WebSocket) => any
+    onOpen?: (ws: WebSocket, req: any) => any
     onError?: (err) => void
     onRequest?: (req, res) => any
     error?: (err) => any

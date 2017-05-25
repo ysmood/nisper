@@ -187,7 +187,7 @@ export default function (opts: Options) {
 
                 wsClient.binaryType = opts.binaryType;
 
-                wsClient.onmessage = genOnMessage(wsClient, opts.onOpen(wsClient))
+                wsClient.onmessage = genOnMessage(wsClient, opts.onOpen(wsClient, undefined))
             };
 
             wsClient.onerror = () => {}
@@ -214,13 +214,13 @@ export default function (opts: Options) {
             wsServer = new WebSocket.Server(opts.wsOptions);
         }
 
-        wsServer.on('connection', ws => {
+        wsServer.on('connection', (ws, req) => {
             ws.binaryType = opts.binaryType;
             ws.onerror = () => {}
             ws.onclose = () => {
                 deleteRpcSessions(ws)
             }
-            ws.onmessage = genOnMessage(ws, opts.onOpen(ws));
+            ws.onmessage = genOnMessage(ws, opts.onOpen(ws, req));
         });
 
         clientCall = call;
