@@ -1,14 +1,17 @@
 {
-    "typescript.tsdk": "./node_modules/typescript/lib",
-    "files.exclude": {
-        "**/.git": true,
-        "**/.DS_Store": true,
-        "node_modules": true,
-        "**/*.js": {
-            "when": "$(basename).ts"
-        },
-        "lib/**/*.d.ts": {
-            "when": "$(basename).ts"
-        }
-    }
+  "typescript.tsdk": "./node_modules/typescript/lib",
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "node_modules": true,
+    "**/*.js": {
+      "when": "$(basename).ts"
+    },
+    "lib/**/*.d.ts": {
+      "when": "$(basename).ts"
+    },
+    "dist": "explorerExcludedFiles",
+    "*.log": "explorerExcludedFiles",
+    "lib/**/*.js": "explorerExcludedFiles"
+  }
 }
