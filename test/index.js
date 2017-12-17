@@ -452,7 +452,7 @@ module.exports = (it) => {
                         defer.resolve(
                             it.eq(
                                 [err.code, err.message],
-                                [1009, 'message too big']
+                                [1006, 'reserved for extensions']
                             )
                         );
                     }
