@@ -7,9 +7,8 @@ import options, { Options } from './options'
 import { extend, genId } from './utils'
 import * as WebSocket from '../types/ws'
 import middleware from './middleware'
-import { ServerRequest, ServerResponse } from 'http'
 
-export { Sandbox, ServerRequest, ServerResponse }
+export { Sandbox }
 
 export default function (opts: Options) {
     opts = options(opts)
