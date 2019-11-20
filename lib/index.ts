@@ -113,7 +113,7 @@ export default function (opts: Options) {
             var error = new Error();
 
         return new Promise((resolve, reject) => {
-            if (isClient && ws.readyState !== 1) {
+            if (isClient && (!ws || ws.readyState !== 1)) {
                 sendQueue.push({
                     nisp, resolve, reject
                 })
