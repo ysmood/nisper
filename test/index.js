@@ -60,7 +60,7 @@ module.exports = (it) => {
                     defer.resolve(
                         it.eq(
                             err.message,
-                            'TypeError: Converting circular structure to JSON'
+                            `TypeError: Converting circular structure to JSON\n    --> starting at object with constructor 'Object'\n    --- property 'a' closes the circle`
                         )
                     );
                 });
